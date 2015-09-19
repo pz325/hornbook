@@ -43,16 +43,28 @@ LEITNER_LEVEL = (
     )
 
 
-class HanziStudyRecord(models.Model):
+class StudyRecord(models.Model):
     user = models.ForeignKey(User, editable=False, db_index=True)
-    hanzi = models.ForeignKey(Hanzi, db_index=True)
     study_date = models.DateTimeField()
     revise_date = models.DateTimeField()
     status = models.CharField(max_length=1, choices=STUDY_RECORD_STATUS)
     repeat_count = models.PositiveSmallIntegerField(default=0)
     forget_count = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+
+class LeitnerStudyRecord(StudyRecord):
     leitner_deck = models.CharField(max_length=1, choices=LEITNER_DECK_TYPE, default='C', db_index=True)
     leitner_level = models.PositiveSmallIntegerField(choices=LEITNER_LEVEL, default=0, db_index=True)
+
+    class Meta:
+        abstract = True
+
+
+class HanziStudyRecord(LeitnerStudyRecord):
+    hanzi = models.ForeignKey(Hanzi, db_index=True)
 
 
 class HanziStudyCount(models.Model):
