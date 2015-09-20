@@ -53,6 +53,8 @@ INSTALLED_APPS = (
 
     'lexicon',
     'study',
+
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,3 +118,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(WSGI_DIR, 'static')
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'PAGE_SIZE': 10
+}

@@ -72,6 +72,5 @@ class HanziStudyCount(models.Model):
     count = models.PositiveSmallIntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)
 
-
 admin.site.register(HanziStudyRecord)
 admin.site.register(HanziStudyCount)
