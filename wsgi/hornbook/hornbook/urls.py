@@ -19,10 +19,10 @@ from rest_framework import routers
 from study.views import HanziStudyCountViewSet
 
 router = routers.DefaultRouter()
-router.register(r'hanzi-study-count', HanziStudyCountViewSet)
+router.register(r'study/hanzi-study-count', HanziStudyCountViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+    url(r'^api/', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
 ]
