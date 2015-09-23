@@ -16,11 +16,18 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
-from study.views import HanziStudyCountViewSet, HanziStudyRecordViewSet
+from study.views import HanziStudyCountViewSet
+from study.views import HanziStudyRecordViewSet
+from study.views import UserViewSet
+from lexicon.views import HanziViewSet
+
 
 router = routers.DefaultRouter()
 router.register(r'study/hanzi-study-count', HanziStudyCountViewSet)
 router.register(r'study/hanzi-study-record', HanziStudyRecordViewSet)
+router.register(r'study/user', UserViewSet)
+router.register(r'lexicon/hanzi', HanziViewSet)
+
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),

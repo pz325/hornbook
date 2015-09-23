@@ -1,7 +1,21 @@
 from django.shortcuts import render
+from django.http import Http404
+
+
 from rest_framework import viewsets
-from study.serializers import HanziStudyCountSerializer, HanziStudyRecordSerializer
-from study.models import HanziStudyCount, HanziStudyRecord
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework import permissions
+
+from django.contrib.auth.models import User
+from study.models import HanziStudyCount
+from study.models import HanziStudyRecord
+
+from study.serializers import HanziStudyCountSerializer
+from study.serializers import HanziStudyRecordSerializer
+from study.serializers import UserStudyRecordSerializer
+from study.permissions import IsOwnerOrReadOnly
 
 
 class HanziStudyCountViewSet(viewsets.ModelViewSet):
@@ -10,5 +24,16 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
 
 
 class HanziStudyRecordViewSet(viewsets.ModelViewSet):
+    studyCount = HanziStudyCount.objects
     queryset = HanziStudyRecord.objects.all()
     serializer_class = HanziStudyRecordSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserStudyRecordSerializer
+    permission_class = (permissions.IsAuthenticatedOrReadOnly,
+                        IsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

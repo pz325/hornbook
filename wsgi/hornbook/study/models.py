@@ -44,7 +44,7 @@ LEITNER_LEVEL = (
 
 
 class StudyRecord(models.Model):
-    user = models.ForeignKey(User, editable=False, db_index=True)
+    user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_records')
     study_date = models.DateTimeField()
     revise_date = models.DateTimeField()
     status = models.CharField(max_length=1, choices=STUDY_RECORD_STATUS)

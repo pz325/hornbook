@@ -1,3 +1,9 @@
 from django.shortcuts import render
+from rest_framework import viewsets
+from lexicon.models import Hanzi
+from lexicon.serializers import HanziSerializer
 
-# Create your views here.
+
+class HanziViewSet(viewsets.ModelViewSet):
+    queryset = Hanzi.objects.all()
+    serializer_class = HanziSerializer
