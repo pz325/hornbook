@@ -1,15 +1,13 @@
 from django.shortcuts import render
-from django.http import Http404
 
 
 from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import permissions
 
 from django.contrib.auth.models import User
 from study.models import HanziStudyCount
 from study.models import HanziStudyRecord
+from lexicon.models import Hanzi
 
 from study.serializers import HanziStudyCountSerializer
 from study.serializers import HanziStudyRecordSerializer
@@ -31,9 +29,15 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
 
 
 class HanziStudyRecordViewSet(viewsets.ModelViewSet):
-    studyCount = HanziStudyCount.objects
     queryset = HanziStudyRecord.objects.all()
     serializer_class = HanziStudyRecordSerializer
+    permission_class = (permissions.IsAuthenticatedOrReadOnly,
+                        IsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        hanzi_data = self.request.data['hanzi']
+        hanzi, _ = Hanzi.objects.get_or_create(content=hanzi_data)
+        serializer.save(user=self.request.user, hanzi=hanzi)
 
 
 class UserViewSet(viewsets.ModelViewSet):
