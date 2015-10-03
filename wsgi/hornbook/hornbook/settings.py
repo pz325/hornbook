@@ -29,6 +29,7 @@ SECRET_KEY = SECRETS['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG') == 'True'
+DEBUG = True
 
 from socket import gethostname
 ALLOWED_HOSTS = [
@@ -121,7 +122,7 @@ STATIC_ROOT = os.path.join(WSGI_DIR, 'static')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.IsAuthenticated'
     ],
     'PAGE_SIZE': 10
 }

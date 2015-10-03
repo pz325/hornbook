@@ -10,7 +10,8 @@ class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    # hanzi = serializers.ReadOnlyField(source='hanzi.content')
+    # user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = HanziStudyRecord
