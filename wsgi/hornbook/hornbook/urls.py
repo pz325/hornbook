@@ -37,5 +37,6 @@ urlpatterns = [
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
 
     url(r'^api/lexicon/hanzis', lexicon.views.HanziList.as_view()),
-    url(r'^api/lexicon/hanzi/(?P<content>\w+)', lexicon.views.HanziDetail.as_view())
+    url(r'^api/lexicon/hanzi/(?P<content>\w+)', lexicon.views.HanziDetail.as_view()),
+    url(r'^api/lexicon/hanzi', lexicon.views.HanziCreate.as_view()),
 ]
