@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
+
 from study.views import HanziStudyCountViewSet
 from study.views import HanziStudyRecordViewSet
 from study.views import UserViewSet
@@ -24,10 +25,10 @@ import lexicon.views
 
 
 router = routers.DefaultRouter()
-router.register(r'study/hanzi-study-count', HanziStudyCountViewSet)
-router.register(r'study/hanzi-study-record', HanziStudyRecordViewSet)
-router.register(r'study/user', UserViewSet)
-router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet)
+router.register(r'study/hanzi-study-count', HanziStudyCountViewSet, base_name='hanzistudycount')
+# router.register(r'study/hanzi-study-record', UserStudyRecordViewSet, base_name='hanzistudyrecord')
+router.register(r'study/user', UserViewSet, base_name='user')
+router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet, base_name='hanzi')
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),

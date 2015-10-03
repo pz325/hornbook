@@ -64,13 +64,14 @@ class LeitnerStudyRecord(StudyRecord):
 
 
 class HanziStudyRecord(LeitnerStudyRecord):
-    hanzi = models.ForeignKey(Hanzi, db_index=True)
+    hanzi = models.ForeignKey(Hanzi, editable=False, db_index=True)
 
 
 class HanziStudyCount(models.Model):
-    user = models.ForeignKey(User, editable=False, db_index=True)
+    user = models.OneToOneField(User, editable=False, db_index=True, related_name='study_counts', primary_key=True)
     count = models.PositiveSmallIntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)
+
 
 admin.site.register(HanziStudyRecord)
 admin.site.register(HanziStudyCount)
