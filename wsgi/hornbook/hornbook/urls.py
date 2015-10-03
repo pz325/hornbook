@@ -21,16 +21,22 @@ from study.views import HanziStudyRecordViewSet
 from study.views import UserViewSet
 from lexicon.views import HanziViewSet
 
+from lexicon.views import hanzi_list
+from lexicon.views import hanzi_detail
+
 
 router = routers.DefaultRouter()
 router.register(r'study/hanzi-study-count', HanziStudyCountViewSet)
 router.register(r'study/hanzi-study-record', HanziStudyRecordViewSet)
 router.register(r'study/user', UserViewSet)
-router.register(r'lexicon/hanzi', HanziViewSet)
+# router.register(r'lexicon/hanzi', HanziViewSet)
 
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
+
+    url(r'^api/lexicon/hanzis', hanzi_list),
+    url(r'^api/lexicon/hanzi/(?P<content>\w+)', hanzi_detail)
 ]
