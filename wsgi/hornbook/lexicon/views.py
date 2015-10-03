@@ -1,7 +1,8 @@
 from django.shortcuts import render
+from django.http import Http404
 
 from rest_framework import viewsets
-
+from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,14 +16,13 @@ class HanziViewSet(viewsets.ModelViewSet):
     serializer_class = HanziSerializer
 
 
-@api_view(['GET', 'POST'])
-def hanzi_list(request):
-    if request.method == 'GET':
+class HanziList(APIView):
+    def get(self, request, format=None):
         hanzis = Hanzi.objects.all()
         serializer = HanziSerializer(hanzis, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = HanziSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -30,25 +30,28 @@ def hanzi_list(request):
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def hanzi_detail(request, content):
-    try:
-        print(content)
-        hanzi = Hanzi.objects.get(content=content)
-    except Hanzi.DoesNotExist:
-        return Response(content, status=status.HTTP_404_NOT_FOUND)
+class HanziDetail(APIView):
+    def get_object(self, content):
+        try:
+            # TODO: could return multiple hanzis (e.g. heteronym (polyphone) )
+            return Hanzi.objects.get(content=content)
+        except Hanzi.DoesNotExist:
+            raise Http404
 
-    if request.method == 'GET':
+    def get(self, request, content, format=None):
+        hanzi = self.get_object(content)
         serializer = HanziSerializer(hanzi)
         return Response(serializer.data)
 
-    if request.method == 'PUT':
+    def put(self, request, content, format=None):
+        hanzi = self.get_object(content)
         serializer = HanziSerializer(hanzi, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'DELETE':
+    def delete(self, request, content, format=None):
+        hanzi = self.get_object(content)
         hanzi.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
