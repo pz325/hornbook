@@ -2,8 +2,7 @@ from study.models import HanziStudyCount, HanziStudyRecord
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-
-from lexicon.models import Hanzi
+import datetime
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
@@ -41,11 +40,9 @@ class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
                             'forget_count'
                             )
 
-    # def create(self, validated_data):
-    #     study_record = HanziStudyRecord(
-
-    #         )
-    #     pass
+    def update(self, instance, validated_data):
+        instance.revise_date = datetime.datetime.now()
+        return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
