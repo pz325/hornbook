@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from lexicon.models import Hanzi
 from django.contrib import admin
-import datetime
+import django.utils.timezone
 
 '''
 Leitner system, a spaced repetition method.
@@ -45,8 +45,8 @@ LEITNER_LEVEL = (
 
 class StudyRecord(models.Model):
     user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_records')
-    study_date = models.DateTimeField(default=datetime.datetime.now())
-    revise_date = models.DateTimeField(default=datetime.datetime.now())
+    study_date = models.DateTimeField(default=django.utils.timezone.now)
+    revise_date = models.DateTimeField(default=django.utils.timezone.now)
     status = models.CharField(max_length=1, choices=STUDY_RECORD_STATUS, default='N')
     repeat_count = models.PositiveSmallIntegerField(default=0)
     forget_count = models.PositiveSmallIntegerField(default=0)

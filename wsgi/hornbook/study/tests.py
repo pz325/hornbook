@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
@@ -49,7 +51,7 @@ class LeitnerTests(TestCase):
             self.assertEqual(expected_deck_id, deck_id)
 
 
-class HanziStudyCountTests(APITestCase):
+class HanziStudyCountViewSetTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
         User.objects.create(username=self.username)
@@ -133,3 +135,62 @@ class HanziStudyCountTests(APITestCase):
         # assert
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class UserViewSetTests(APITestCase):
+    def setUp(self):
+        self.username = 'test_user'
+        self._create_one_User_instance(self.username)
+        self.user = User.objects.get(username=self.username)
+        self.client.force_authenticate(user=self.user)
+
+    def _create_one_User_instance(self, username):
+        User.objects.create(username=username)
+
+    def _create_one_HanziStudyCount_instance(self, count):
+        url = reverse('hanzistudycount-list')
+        data = {'count': count}
+        self.client.post(url, data, format='json')
+
+    def _create_one_HanziStudyRecord_instance(self, hanzi):
+        url = reverse('hanzistudyrecord-list')
+        data = {'hanzi': hanzi}
+        self.client.post(url, data, format='json')
+
+    def test_list_User(self):
+        # arrange
+        count = 3
+        self._create_one_HanziStudyCount_instance(count)
+        hanzi = r'风'
+        self._create_one_HanziStudyRecord_instance(hanzi)
+
+        # act
+        url = reverse('user-list')
+        response = self.client.get(url)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        result_data = response.data['results']
+        self.assertEqual(len(result_data), 1)
+        self.assertEqual(result_data[0]['username'], self.user.username)
+        self.assertEqual(result_data[0]['study_counts'], count)
+        self.assertEqual(len(result_data[0]['study_records']), 1)
+        self.assertEqual(result_data[0]['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[1]))
+
+    def test_get_one_User(self):
+        # arrange
+        count = 3
+        self._create_one_HanziStudyCount_instance(count)
+        hanzi = r'风'
+        self._create_one_HanziStudyRecord_instance(hanzi)
+
+        # act
+        url = reverse('user-detail', args=[1])
+        response = self.client.get(url)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.user.username)
+        self.assertEqual(response.data['study_counts'], count)
+        self.assertEqual(len(response.data['study_records']), 1)
+        self.assertEqual(response.data['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[1]))

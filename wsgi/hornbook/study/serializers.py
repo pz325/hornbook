@@ -1,8 +1,7 @@
 from study.models import HanziStudyCount, HanziStudyRecord
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
-import datetime
+import django.utils.timezone
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
@@ -41,7 +40,7 @@ class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
                             )
 
     def update(self, instance, validated_data):
-        instance.revise_date = datetime.datetime.now()
+        instance.revise_date = django.utils.timezone.now
         return instance
 
 

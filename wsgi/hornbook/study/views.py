@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 
 from rest_framework import viewsets
+from rest_framework import mixins
 from rest_framework import permissions
 
 from django.contrib.auth.models import User
@@ -40,7 +41,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, hanzi=hanzi)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_class = (permissions.IsAuthenticatedOrReadOnly,
