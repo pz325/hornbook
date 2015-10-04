@@ -45,8 +45,8 @@ LEITNER_LEVEL = (
 
 class StudyRecord(models.Model):
     user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_records')
-    study_date = models.DateTimeField(default=django.utils.timezone.now)
-    revise_date = models.DateTimeField(default=django.utils.timezone.now)
+    study_date = models.DateTimeField(auto_now=True)
+    revise_date = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=1, choices=STUDY_RECORD_STATUS, default='N')
     repeat_count = models.PositiveSmallIntegerField(default=0)
     forget_count = models.PositiveSmallIntegerField(default=0)

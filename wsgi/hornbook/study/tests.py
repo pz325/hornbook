@@ -6,7 +6,28 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from study.models import HanziStudyCount
+from study.models import HanziStudyRecord
+from lexicon.models import Hanzi
 from django.contrib.auth.models import User
+
+
+def _create_one_HanziStudyCount_instance(user, count):
+    HanziStudyCount.objects.create(
+        user=user,
+        count=count
+        )
+
+
+def _create_one_User_instance(username):
+    User.objects.create(username=username)
+
+
+def _create_one_HanziStudyRecord_instance(user, hanzi):
+    hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
+    HanziStudyRecord.objects.create(
+        user=user,
+        hanzi=hanzi_instance
+        )
 
 
 class StudyTestCase(TestCase):
@@ -54,14 +75,9 @@ class LeitnerTests(TestCase):
 class HanziStudyCountViewSetTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        User.objects.create(username=self.username)
+        _create_one_User_instance(self.username)
         self.user = User.objects.get(username=self.username)
         self.client.force_authenticate(user=self.user)
-
-    def _create_one_HanziStudyCount_instance(self, count):
-        url = reverse('hanzistudycount-list')
-        data = {'count': count}
-        self.client.post(url, data, format='json')
 
     def test_create_HanziStudyCount(self):
         # arrange
@@ -81,7 +97,7 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_list_HanziStudyCount(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
+        _create_one_HanziStudyCount_instance(self.user, count)
 
         # act
         url = reverse('hanzistudycount-list')
@@ -95,7 +111,7 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_get_one_HanziStudyCount(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
+        _create_one_HanziStudyCount_instance(self.user, count)
 
         # act
         url = reverse('hanzistudycount-detail', args=[self.user.id])
@@ -108,61 +124,46 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_put_one_HanziStudyCount(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
+        _create_one_HanziStudyCount_instance(self.user, count)
 
         # act
         count = 6
         data = {'count': count}
         url = reverse('hanzistudycount-detail', args=[self.user.id])
-        put_response = self.client.put(url, data=data, format='json')
-        get_response = self.client.get(url)
+        response = self.client.put(url, data=data, format='json')
 
         # assert
-        self.assertEqual(put_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(get_response.data['count'], count)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(HanziStudyCount.objects.count(), 1)
+        self.assertEqual(HanziStudyCount.objects.get().count, count)
 
     def test_delete_one_HanziStudyCount(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
+        _create_one_HanziStudyCount_instance(self.user, count)
 
         # act
         url = reverse('hanzistudycount-detail', args=[self.user.id])
-        delete_response = self.client.delete(url)
-        get_response = self.client.get(url)
+        response = self.client.delete(url)
 
         # assert
-        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(HanziStudyCount.objects.count(), 0)
 
 
 class UserViewSetTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        self._create_one_User_instance(self.username)
+        _create_one_User_instance(self.username)
         self.user = User.objects.get(username=self.username)
         self.client.force_authenticate(user=self.user)
-
-    def _create_one_User_instance(self, username):
-        User.objects.create(username=username)
-
-    def _create_one_HanziStudyCount_instance(self, count):
-        url = reverse('hanzistudycount-list')
-        data = {'count': count}
-        self.client.post(url, data, format='json')
-
-    def _create_one_HanziStudyRecord_instance(self, hanzi):
-        url = reverse('hanzistudyrecord-list')
-        data = {'hanzi': hanzi}
-        self.client.post(url, data, format='json')
 
     def test_list_User(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
-        hanzi = r'风'
-        self._create_one_HanziStudyRecord_instance(hanzi)
+        _create_one_HanziStudyCount_instance(self.user, count)
+        hanzi = u'风'
+        _create_one_HanziStudyRecord_instance(self.user, hanzi)
 
         # act
         url = reverse('user-list')
@@ -180,9 +181,9 @@ class UserViewSetTests(APITestCase):
     def test_get_one_User(self):
         # arrange
         count = 3
-        self._create_one_HanziStudyCount_instance(count)
-        hanzi = r'风'
-        self._create_one_HanziStudyRecord_instance(hanzi)
+        _create_one_HanziStudyCount_instance(self.user, count)
+        hanzi = u'风'
+        _create_one_HanziStudyRecord_instance(self.user, hanzi)
 
         # act
         url = reverse('user-detail', args=[1])
