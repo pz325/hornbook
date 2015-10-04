@@ -34,4 +34,5 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^docs/', include('rest_framework_swagger.urls'))
 ]
