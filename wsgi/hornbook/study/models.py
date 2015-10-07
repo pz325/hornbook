@@ -57,7 +57,7 @@ class StudyRecord(models.Model):
 
 class LeitnerStudyRecord(StudyRecord):
     leitner_deck = models.CharField(max_length=1, choices=LEITNER_DECK_TYPE, default='C', db_index=True)
-    leitner_level = models.PositiveSmallIntegerField(choices=LEITNER_LEVEL, default=0, db_index=True)
+    leitner_level = models.PositiveSmallIntegerField(choices=LEITNER_LEVEL, default=1, db_index=True)
 
     class Meta:
         abstract = True
