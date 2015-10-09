@@ -14,8 +14,6 @@ from lexicon.models import Hanzi
 from study.serializers import HanziStudyCountSerializer
 from study.serializers import HanziStudyRecordSerializer
 from study.serializers import UserSerializer
-from study.permissions import IsOwnerOrReadOnly
-from study.permissions import IsOwner
 
 import leitner
 import random
@@ -62,34 +60,37 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         NUM_PERMANENT = 10
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user)
 
-        current_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')
-        level2_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count, 2)), leitner_level=2)
-        level3_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count, 3)), leitner_level=3)
-        level4_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count, 4)), leitner_level=4)
-        retired_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')
-        permanent_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='P')
+        current_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')]
+        level2_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 2)), leitner_level=2)]
+        level3_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 3)), leitner_level=3)]
+        level4_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 4)), leitner_level=4)]
+        retired_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')]
+        permanent_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='P')]
 
         random.shuffle(retired_deck)
         random.shuffle(permanent_deck)
         ret = current_deck + level2_deck + level3_deck + level4_deck + retired_deck[:NUM_RETIRED] + permanent_deck[:NUM_PERMANENT]
-        return Response(ret)
+        serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def _set_leitner_record(self, request):
         '''
         {
-            "grasped": ["u0x2345", "u0x2345"],
-            "unknown": ["u0x2345", "u0x2345"]
+            "grasped_hanzi": ["u0x2345", "u0x2345"],
+            "new_hanzi": ["u0x2345", "u0x2345"]
         }
         '''
-        study_records = jsonpickle.decode(request.POST['study_records'])
+        grasped_hanzi = jsonpickle.decode(request.POST['grasped_hanzi'])
+        new_hanzi = jsonpickle.decode(request.POST['new_hanzi'])
+
         study_count = HanziStudyCount.objects.get(user=request.user)
 
-        current_deck_id = leitner.get_deck_id(study_count, 1)
+        current_deck_id = leitner.get_deck_id(study_count.count, 1)
 
-        for hanzi in study_records['grasped']:
-            hanzi_instance = Hanzi.objects.get(content=hanzi)
-            study_record, new_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
-            if not new_record:
+        for hanzi in grasped_hanzi:
+            hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
+            if not is_new_hanzi:
+                study_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
                 # update level
                 study_record.leitner_level += 1
                 # move from Deck Current to Session Deck
@@ -104,10 +105,10 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                     study_record.leitner_deck = 'P'
                 study_record.save()
 
-        for hanzi in study_records['unknown']:
-            hanzi_instance = Hanzi.objects.get(content=hanzi)
-            study_record, new_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
-            if not new_record:
+        for hanzi in new_hanzi:
+            hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
+            if not is_new_hanzi:
+                study_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
                 # move to Deck Current, set level to 0
                 study_record.leitner_deck = 'C'
                 study_record.leitner_level = 0
