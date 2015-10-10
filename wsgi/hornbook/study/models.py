@@ -4,6 +4,8 @@ from lexicon.models import Hanzi
 from django.contrib import admin
 import django.utils.timezone
 
+import leitner
+
 '''
 Leitner system, a spaced repetition method.
 refer to http://en.wikipedia.org/wiki/Leitner_system
@@ -14,32 +16,6 @@ STUDY_RECORD_STATUS = (
     ('N', 'New'),
     ('S', 'Studying'),
     ('G', 'Grasped'),
-    )
-
-LEITNER_DECK_TYPE = (
-    ('C', 'Current'),
-    ('0', '0'),
-    ('1', '1'),
-    ('2', '2'),
-    ('3', '3'),
-    ('4', '4'),
-    ('5', '5'),
-    ('6', '6'),
-    ('7', '7'),
-    ('8', '8'),
-    ('9', '9'),
-    ('R', 'Retired'),
-    ('P', 'Permanent'),
-    )
-
-LEITNER_LEVEL = (
-    (0, 'Level 0'),
-    (1, 'Level 1'),
-    (2, 'Level 2'),
-    (3, 'Level 3'),
-    (4, 'Level 4'),
-    (5, 'Level 5'),
-    (6, 'Level 6'),
     )
 
 
@@ -56,8 +32,7 @@ class StudyRecord(models.Model):
 
 
 class LeitnerStudyRecord(StudyRecord):
-    leitner_deck = models.CharField(max_length=1, choices=LEITNER_DECK_TYPE, default='C', db_index=True)
-    leitner_level = models.PositiveSmallIntegerField(choices=LEITNER_LEVEL, default=1, db_index=True)
+    leitner_deck = models.CharField(max_length=1, choices=leitner.DECK_TYPE, default='C', db_index=True)
 
     class Meta:
         abstract = True

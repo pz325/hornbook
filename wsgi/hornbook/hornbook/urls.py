@@ -25,8 +25,8 @@ import lexicon.views
 
 
 router = routers.DefaultRouter()
-router.register(r'study/hanzi-study-count', HanziStudyCountViewSet, base_name='hanzistudycount')
-router.register(r'study/hanzi-study-record', HanziStudyRecordViewSet, base_name='hanzistudyrecord')
+router.register(r'study/hanzi_study_count', HanziStudyCountViewSet, base_name='hanzistudycount')
+router.register(r'study/hanzi_study_record', HanziStudyRecordViewSet, base_name='hanzistudyrecord')
 router.register(r'study/user', UserViewSet, base_name='user')
 router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet, base_name='hanzi')
 

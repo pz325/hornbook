@@ -56,20 +56,28 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, hanzi=hanzi)
 
     def _get_leitner_record(self, request):
-        NUM_RETIRED = 5
-        NUM_PERMANENT = 10
+        '''
+        query: num_retired
+        '''
+        NUM_RETIRED = 10
+        if 'num_retired' in request.GET:
+            num_retiried = int(request.GET['num_retired'])
+        else:
+            num_retiried = NUM_RETIRED
+
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user)
+        deck_ids = leitner.decks_to_review(study_count.count)
 
-        current_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')]
-        level2_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 2)), leitner_level=2)]
-        level3_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 3)), leitner_level=3)]
-        level4_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=str(leitner.get_deck_id(study_count.count, 4)), leitner_level=4)]
+        ret = []
+        ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')]  # current deck
+        for i in deck_ids:
+            ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=i)]  # progres deck
+
         retired_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')]
-        permanent_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='P')]
-
         random.shuffle(retired_deck)
-        random.shuffle(permanent_deck)
-        ret = current_deck + level2_deck + level3_deck + level4_deck + retired_deck[:NUM_RETIRED] + permanent_deck[:NUM_PERMANENT]
+
+        ret = ret + retired_deck[:num_retiried]
+
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -85,24 +93,16 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
         study_count = HanziStudyCount.objects.get(user=request.user)
 
-        current_deck_id = leitner.get_deck_id(study_count.count, 1)
-
         for hanzi in grasped_hanzi:
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
                 study_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
-                # update level
-                study_record.leitner_level += 1
                 # move from Deck Current to Session Deck
                 if study_record.leitner_deck == 'C':
-                    study_record.leitner_deck = current_deck_id
+                    study_record.leitner_deck = str(study_count.count % 10)
                 # move from Session Deck to Deck Retired
-                if study_record.leitner_level == 4:
+                if leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
                     study_record.leitner_deck = 'R'
-                # move from Deck Retired to Deck Permanent
-                if study_record.leitner_level >= 5:
-                    study_record.leitner_level = 5
-                    study_record.leitner_deck = 'P'
                 study_record.save()
 
         for hanzi in new_hanzi:
@@ -111,14 +111,13 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                 study_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
                 # move to Deck Current, set level to 0
                 study_record.leitner_deck = 'C'
-                study_record.leitner_level = 0
                 study_record.forget_count += 1
                 study_record.save()
 
         # update session count
         study_count.count += 1
         study_count.save()
-        return Response('POST leitner')
+        return Response(request.data)
 
 
 class UserViewSet(mixins.ListModelMixin,

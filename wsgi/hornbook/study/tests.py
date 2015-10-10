@@ -39,37 +39,26 @@ class StudyTestCase(TestCase):
         self.assertEqual(True, True)
 
 
-from leitner import get_deck_id
+# from leitner import get_deck_id
+from leitner import is_last_number_on_deck
+from leitner import to_review
+from leitner import decks_to_review
 
 
 class LeitnerTests(TestCase):
-    def test_get_correct_level1_cards(self):
-        session_counts = range(0, 10)
-        expected_deck_ids = range(0, 10)
-        for session_count, expected_deck_id in zip(session_counts, expected_deck_ids):
-            deck_id = get_deck_id(session_count=session_count, level=1)
-            self.assertEqual(expected_deck_id, deck_id)
+    def test_is_last_number_on_deck(self):
+        self.assertTrue(is_last_number_on_deck('0', 9))
+        self.assertTrue(is_last_number_on_deck('1', 0))
+        self.assertFalse(is_last_number_on_deck('2', 0))
 
-    def test_get_correct_level2_cards(self):
-        session_counts = range(0, 10)
-        expected_deck_ids = (8, 9, 0, 1, 2, 3, 4, 5, 6, 7)
-        for session_count, expected_deck_id in zip(session_counts, expected_deck_ids):
-            deck_id = get_deck_id(session_count=session_count, level=2)
-            self.assertEqual(expected_deck_id, deck_id)
+    def test_to_review(self):
+        self.assertTrue(to_review('0', 12))
+        self.assertTrue(to_review('0', 5))
+        self.assertTrue(to_review('0', 20))
 
-    def test_get_correct_level3_cards(self):
-        session_counts = range(0, 10)
-        expected_deck_ids = (5, 6, 7, 8, 9, 0, 1, 2, 3, 4)
-        for session_count, expected_deck_id in zip(session_counts, expected_deck_ids):
-            deck_id = get_deck_id(session_count=session_count, level=3)
-            self.assertEqual(expected_deck_id, deck_id)
-
-    def test_get_correct_level4_cards(self):
-        session_counts = range(0, 10)
-        expected_deck_ids = (1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
-        for session_count, expected_deck_id in zip(session_counts, expected_deck_ids):
-            deck_id = get_deck_id(session_count=session_count, level=4)
-            self.assertEqual(expected_deck_id, deck_id)
+    def test_decks_to_review(self):
+        decks_ids = decks_to_review(12)
+        self.assertListEqual(['0', '2', '3', '7'], decks_ids)
 
 
 class HanziStudyCountViewSetTests(APITestCase):
