@@ -59,24 +59,25 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         '''
         query parameter: num_retired
         '''
+        print(jsonpickle.encode(request.data))
         NUM_RETIRED = 10
-        if 'num_retired' in request.GET:
-            num_retiried = int(request.GET['num_retired'])
-        else:
-            num_retiried = NUM_RETIRED
-
+        num_retired_key = 'num_retired'
+        num_retired = int(request.data[num_retired_key]) if num_retired_key in request.data else NUM_RETIRED
+        print(num_retired)
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user)
         deck_ids = leitner.decks_to_review(study_count.count)
-
+        
+        print('_get_leitner_record', [h.leitner_deck for h in HanziStudyRecord.objects.filter(user=request.user)])
+        
         ret = []
         ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')]  # current deck
         for i in deck_ids:
             ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=i)]  # progres deck
 
         retired_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')]
+        print(retired_deck)
         random.shuffle(retired_deck)
-
-        ret = ret + retired_deck[:num_retiried]
+        ret = ret + retired_deck[:num_retired]
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
         return Response(serializer.data)
@@ -87,9 +88,12 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             "grasped_hanzi": ["u0x2345", "u0x2345"],
             "new_hanzi": ["u0x2345", "u0x2345"]
         }
+        in terms of new_hanzi, if hanzi is new, create a new record; else, set record's leitner deck to 'C'
         '''
-        grasped_hanzi = jsonpickle.decode(request.POST['grasped_hanzi'])
-        new_hanzi = jsonpickle.decode(request.POST['new_hanzi'])
+        grasped_hanzi_key = 'grasped_hanzi'
+        new_hanzi_key = 'new_hanzi'
+        grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
+        new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
 
         study_count = HanziStudyCount.objects.get(user=request.user)
 
@@ -113,6 +117,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                 study_record.leitner_deck = 'C'
                 study_record.forget_count += 1
                 study_record.save()
+            else:
+                HanziStudyRecord.objects.create(user=request.user, hanzi=hanzi_instance)
 
         # update session count
         study_count.count += 1

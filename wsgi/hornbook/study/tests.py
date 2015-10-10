@@ -16,23 +16,30 @@ from leitner import decks_to_review
 
 
 def _create_one_HanziStudyCount_instance(user, count):
-    HanziStudyCount.objects.create(
+    return HanziStudyCount.objects.create(
         user=user,
         count=count
         )
 
 
 def _create_one_User_instance(username):
-    User.objects.create(username=username)
-    return User.objects.get(username=username)
+    return User.objects.create(username=username)
 
 
 def _create_one_HanziStudyRecord_instance(user, hanzi):
     hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
-    HanziStudyRecord.objects.create(
+    return HanziStudyRecord.objects.create(
         user=user,
         hanzi=hanzi_instance
         )
+
+
+def _create_one_leitner_record(user, hanzi, deck_id):
+    hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
+    return HanziStudyRecord.objects.create(
+        user=user,
+        hanzi=hanzi_instance,
+        leitner_deck=deck_id)
 
 
 class LeitnerTests(TestCase):
@@ -182,5 +189,146 @@ class UserViewSetTests(APITestCase):
 
 
 class HanziStudyRecordViewSetTests(APITestCase):
-    def function():
-        pass
+    def setUp(self):
+        self.username = 'test_user'
+        self.user = _create_one_User_instance(self.username)
+        self.client.force_authenticate(user=self.user)
+
+        another_user = _create_one_User_instance('another_user')
+        _create_one_HanziStudyRecord_instance(another_user, u'王')
+
+    def test_list_HanziStudyRecord(self):
+        # arrange
+        hanzis = [u'东', u'南']
+        for h in hanzis:
+            _create_one_HanziStudyRecord_instance(self.user, h)
+
+        # act
+        url = reverse('hanzistudyrecord-list')
+        response = self.client.get(url, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)
+
+    def test_create_HanziStudyRecord(self):
+        # arrange
+        url = reverse('hanzistudyrecord-list')
+        hanzi = u'东'
+        data = {'hanzi': hanzi}
+
+        # act
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Hanzi.objects.filter(content=hanzi).count(), 1)
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user).hanzi, Hanzi.objects.get(content=hanzi))
+
+    def test_get_one_HanziStudyRecord(self):
+        # arrange
+        hanzi = u'东'
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+
+        # act
+        url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        response = self.client.get(url, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['hanzi'], hanzi)
+
+    def test_put_one_HanziStudyRecord(self):
+        # arrange
+        hanzi = u'东'
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+
+        # act
+        hanzi = u'王'
+        data = {'hanzi': hanzi}
+        url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        response = self.client.put(url, data=data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user), hanzi_study_record_instance)
+
+    def test_delete_one_HanziStudyRecord(self):
+        # arrange
+        hanzi = u'东'
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+
+        # act
+        url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        response = self.client.delete(url)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 0)
+
+    # def test_get_leitner_record(self):
+    #     # arrange
+    #     current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
+    #     progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
+    #     progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '3')
+    #     _create_one_HanziStudyCount_instance(self.user, 1)
+
+    #     # act
+    #     url = reverse('hanzistudyrecord-list') + 'leitner_record/'
+    #     response = self.client.get(url, format='json')
+
+    #     # assert
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(len(response.data), 2)
+
+    def test_get_leitner_record_with_num_retired(self):
+        # arrange
+        _create_one_leitner_record(self.user, u'东', 'C')
+        _create_one_leitner_record(self.user, u'南', '1')
+        _create_one_leitner_record(self.user, u'西', '3')
+        _create_one_leitner_record(self.user, u'北', 'R')
+        _create_one_leitner_record(self.user, u'春', 'R')
+        _create_one_leitner_record(self.user, u'夏', 'R')
+        _create_one_leitner_record(self.user, u'东', 'R')
+        # print([h.leitner_deck for h in HanziStudyRecord.objects.filter(user=self.user)])
+        _create_one_HanziStudyCount_instance(self.user, 1)
+
+        # act
+        num_retired = 2
+        url = reverse('hanzistudyrecord-list') + 'leitner_record?num_retired={num_retired}'.format(num_retired=num_retired)
+        url = reverse('hanzistudyrecord-list') + 'leitner_record/'
+        data = {'num_retired': num_retired}
+        print(url)
+        response = self.client.get(url, data, format='json')
+        print(response.status_code)
+        # assert
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.assertEqual(len(response.data), 4)  # two from deck R
+
+    def test_set_leitner_record(self):
+        # arrange
+        current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
+        progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
+        progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '2')
+        _create_one_HanziStudyCount_instance(self.user, 1)
+
+        # act
+        url = reverse('hanzistudyrecord-list') + 'leitner_record/'
+        data = {
+            'grasped_hanzi': [u'东', u'西'],   # 东 -> deck 1, 西 -> deck R
+            'new_hanzi': [u'北', u'南']        # 北 -> deck C, new Hanzi, 南 -> deck C
+        }
+
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, 2)
+        self.assertEqual(Hanzi.objects.all().count(), 5)  # including 王 added during Setup
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, '1')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'西')).leitner_deck, 'R')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).leitner_deck, 'C')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).forget_count, 1)
