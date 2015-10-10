@@ -21,7 +21,6 @@ class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
         model = HanziStudyRecord
         fileds = ('haizi',
                   'leitner_deck',
-                  'leitner_level',
                   'user',
                   'study_date',
                   'revise_date',
@@ -31,7 +30,6 @@ class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
                   )
         depth = 1
         read_only_fields = ('leitner_deck',
-                            'leitner_level',
                             'study_date',
                             'revise_date',
                             'status',

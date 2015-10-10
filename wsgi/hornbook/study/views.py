@@ -57,7 +57,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
     def _get_leitner_record(self, request):
         '''
-        query: num_retired
+        query parameter: num_retired
         '''
         NUM_RETIRED = 10
         if 'num_retired' in request.GET:
@@ -109,7 +109,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
                 study_record = HanziStudyRecord.objects.get(user=request.user, hanzi=hanzi_instance)
-                # move to Deck Current, set level to 0
+                # move to Deck Current
                 study_record.leitner_deck = 'C'
                 study_record.forget_count += 1
                 study_record.save()

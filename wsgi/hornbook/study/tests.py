@@ -10,6 +10,10 @@ from study.models import HanziStudyRecord
 from lexicon.models import Hanzi
 from django.contrib.auth.models import User
 
+from leitner import is_last_number_on_deck
+from leitner import to_review
+from leitner import decks_to_review
+
 
 def _create_one_HanziStudyCount_instance(user, count):
     HanziStudyCount.objects.create(
@@ -20,6 +24,7 @@ def _create_one_HanziStudyCount_instance(user, count):
 
 def _create_one_User_instance(username):
     User.objects.create(username=username)
+    return User.objects.get(username=username)
 
 
 def _create_one_HanziStudyRecord_instance(user, hanzi):
@@ -28,21 +33,6 @@ def _create_one_HanziStudyRecord_instance(user, hanzi):
         user=user,
         hanzi=hanzi_instance
         )
-
-
-class StudyTestCase(TestCase):
-    def setUp(self):
-        pass
-
-    def test_dummy(self):
-        '''dummy test'''
-        self.assertEqual(True, True)
-
-
-# from leitner import get_deck_id
-from leitner import is_last_number_on_deck
-from leitner import to_review
-from leitner import decks_to_review
 
 
 class LeitnerTests(TestCase):
@@ -64,9 +54,11 @@ class LeitnerTests(TestCase):
 class HanziStudyCountViewSetTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        _create_one_User_instance(self.username)
-        self.user = User.objects.get(username=self.username)
+        self.user = _create_one_User_instance(self.username)
         self.client.force_authenticate(user=self.user)
+
+        another_user = _create_one_User_instance('another_user')
+        _create_one_HanziStudyCount_instance(another_user, 10)
 
     def test_create_HanziStudyCount(self):
         # arrange
@@ -79,9 +71,8 @@ class HanziStudyCountViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(HanziStudyCount.objects.count(), 1)
-        self.assertEqual(HanziStudyCount.objects.get().count, count)
-        self.assertEqual(HanziStudyCount.objects.get().user.username, self.username)
+        self.assertEqual(HanziStudyCount.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
 
     def test_list_HanziStudyCount(self):
         # arrange
@@ -123,8 +114,8 @@ class HanziStudyCountViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(HanziStudyCount.objects.count(), 1)
-        self.assertEqual(HanziStudyCount.objects.get().count, count)
+        self.assertEqual(HanziStudyCount.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
 
     def test_delete_one_HanziStudyCount(self):
         # arrange
@@ -137,15 +128,19 @@ class HanziStudyCountViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(HanziStudyCount.objects.count(), 0)
+        self.assertEqual(HanziStudyCount.objects.filter(user=self.user).count(), 0)
 
 
 class UserViewSetTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        _create_one_User_instance(self.username)
-        self.user = User.objects.get(username=self.username)
+        self.user = _create_one_User_instance(self.username)
         self.client.force_authenticate(user=self.user)
+
+        another_user = _create_one_User_instance('another_user')
+        _create_one_HanziStudyCount_instance(another_user, 10)
+        hanzi = u'王'
+        _create_one_HanziStudyRecord_instance(another_user, hanzi)
 
     def test_list_User(self):
         # arrange
@@ -165,7 +160,7 @@ class UserViewSetTests(APITestCase):
         self.assertEqual(result_data[0]['username'], self.user.username)
         self.assertEqual(result_data[0]['study_counts'], count)
         self.assertEqual(len(result_data[0]['study_records']), 1)
-        self.assertEqual(result_data[0]['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[1]))
+        self.assertEqual(result_data[0]['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[2]))
 
     def test_get_one_User(self):
         # arrange
@@ -183,4 +178,9 @@ class UserViewSetTests(APITestCase):
         self.assertEqual(response.data['username'], self.user.username)
         self.assertEqual(response.data['study_counts'], count)
         self.assertEqual(len(response.data['study_records']), 1)
-        self.assertEqual(response.data['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[1]))
+        self.assertEqual(response.data['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[2]))
+
+
+class HanziStudyRecordViewSetTests(APITestCase):
+    def function():
+        pass
