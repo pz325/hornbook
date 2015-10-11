@@ -24,7 +24,7 @@ from study.views import UserViewSet
 import lexicon.views
 
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'study/hanzi_study_count', HanziStudyCountViewSet, base_name='hanzistudycount')
 router.register(r'study/hanzi_study_record', HanziStudyRecordViewSet, base_name='hanzistudyrecord')
 router.register(r'study/user', UserViewSet, base_name='user')

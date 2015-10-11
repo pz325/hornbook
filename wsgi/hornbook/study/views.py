@@ -59,23 +59,18 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         '''
         query parameter: num_retired
         '''
-        print(jsonpickle.encode(request.data))
         NUM_RETIRED = 10
         num_retired_key = 'num_retired'
-        num_retired = int(request.data[num_retired_key]) if num_retired_key in request.data else NUM_RETIRED
-        print(num_retired)
+        num_retired = int(request.query_params[num_retired_key]) if num_retired_key in request.query_params else NUM_RETIRED
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user)
         deck_ids = leitner.decks_to_review(study_count.count)
-        
-        print('_get_leitner_record', [h.leitner_deck for h in HanziStudyRecord.objects.filter(user=request.user)])
-        
+
         ret = []
         ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C')]  # current deck
         for i in deck_ids:
             ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=i)]  # progres deck
 
         retired_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')]
-        print(retired_deck)
         random.shuffle(retired_deck)
         ret = ret + retired_deck[:num_retired]
 

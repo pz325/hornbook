@@ -268,20 +268,20 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 0)
 
-    # def test_get_leitner_record(self):
-    #     # arrange
-    #     current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
-    #     progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
-    #     progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '3')
-    #     _create_one_HanziStudyCount_instance(self.user, 1)
+    def test_get_leitner_record(self):
+        # arrange
+        current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
+        progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
+        progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '3')
+        _create_one_HanziStudyCount_instance(self.user, 1)
 
-    #     # act
-    #     url = reverse('hanzistudyrecord-list') + 'leitner_record/'
-    #     response = self.client.get(url, format='json')
+        # act
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        response = self.client.get(url, format='json')
 
-    #     # assert
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(len(response.data), 2)
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
 
     def test_get_leitner_record_with_num_retired(self):
         # arrange
@@ -292,20 +292,16 @@ class HanziStudyRecordViewSetTests(APITestCase):
         _create_one_leitner_record(self.user, u'春', 'R')
         _create_one_leitner_record(self.user, u'夏', 'R')
         _create_one_leitner_record(self.user, u'东', 'R')
-        # print([h.leitner_deck for h in HanziStudyRecord.objects.filter(user=self.user)])
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
         num_retired = 2
-        url = reverse('hanzistudyrecord-list') + 'leitner_record?num_retired={num_retired}'.format(num_retired=num_retired)
-        url = reverse('hanzistudyrecord-list') + 'leitner_record/'
-        data = {'num_retired': num_retired}
-        print(url)
-        response = self.client.get(url, data, format='json')
-        print(response.status_code)
+        url = reverse('hanzistudyrecord-list') + '/leitner_record?num_retired={num_retired}'.format(num_retired=num_retired)
+        response = self.client.get(url, format='json')
+
         # assert
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(len(response.data), 4)  # two from deck R
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)  # two from deck R
 
     def test_set_leitner_record(self):
         # arrange
@@ -315,7 +311,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
-        url = reverse('hanzistudyrecord-list') + 'leitner_record/'
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
         data = {
             'grasped_hanzi': [u'东', u'西'],   # 东 -> deck 1, 西 -> deck R
             'new_hanzi': [u'北', u'南']        # 北 -> deck C, new Hanzi, 南 -> deck C
