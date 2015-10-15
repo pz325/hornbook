@@ -13,7 +13,7 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
-from django.conf.urls import include, url, patterns
+from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
 
@@ -21,7 +21,6 @@ from study.views import HanziStudyCountViewSet
 from study.views import HanziStudyRecordViewSet
 from study.views import UserViewSet
 
-from hornbook.settings import STATIC_ROOT
 
 import lexicon.views
 
@@ -38,5 +37,3 @@ urlpatterns = [
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls'))
 ]
-
-urlpatterns += patterns('', url(r'^static/(.*)$', 'django.views.static.serve', {'document_root': STATIC_ROOT, 'show_indexes': True}),)
