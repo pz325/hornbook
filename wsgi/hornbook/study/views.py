@@ -26,7 +26,7 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
     '''
     queryset = HanziStudyCount.objects.all()
     serializer_class = HanziStudyCountSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -126,7 +126,7 @@ class UserViewSet(mixins.ListModelMixin,
                   viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return User.objects.filter(username=self.request.user.username)

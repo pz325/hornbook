@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.generic import TemplateView
+# from django.views.generic import TemplateView
 
 from rest_framework import routers
 
@@ -39,5 +39,12 @@ urlpatterns = [
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
-    url(r'^$', TemplateView.as_view(template_name='index.html')),
+    # url(r'^$', TemplateView.as_view(template_name='index.html')),
+    url(r'^$', 'hornbook.views.index'),
+
+    # log in/out
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login',
+        {'template_name': 'login.html'}),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout',
+        {'next_page': '/'}),
 ]

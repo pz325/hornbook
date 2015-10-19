@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from lexicon.models import Hanzi
 from django.contrib import admin
 import django.utils.timezone
+from django.contrib.auth.decorators import login_required
 
 import leitner
 
