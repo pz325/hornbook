@@ -14,7 +14,7 @@
     {% if user.is_authenticated %}
     <li><a href='/accounts/logout/'>Log out</a></li>
     {% else %}
-    <li id="nav_accounts" ><a href="/accounts/login/">Log in</a></li>
+    <li><a href="/accounts/login/">Log in</a></li>
     {% endif %}
     <li>{{user.username}}</li>
     {% block content %}{% endblock %}

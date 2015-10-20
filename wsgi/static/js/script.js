@@ -21,7 +21,7 @@ var TestApp = React.createClass({
   }
 });
 
-React.render(  
+ReactDOM.render(  
   React.createElement(TestApp, null),
   document.getElementById('content')
 );
