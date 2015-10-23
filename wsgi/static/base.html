@@ -29,7 +29,14 @@
     <li><a href="/accounts/login/">Log in</a></li>
     {% endif %}
     <li>{{user.username}}</li>
+    
+    
     {% block content %}{% endblock %}
+    
+    <div class="footer">
+      <p class="text-center">Copyright © 2013 - 2016 Ping Zou All Rights Reserved </p>
+    </div>
+    
     {% block js %}{% endblock %}
   </body>
 </html>  
