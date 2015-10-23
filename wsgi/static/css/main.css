@@ -1,0 +1,58 @@
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 30px;
+  background-color: #C7EDCC;
+}
+
+.navbar{
+    border: none;
+    background-image: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    margin-bottom: 0px;
+}
+
+.navbar-default {
+    background-color: transparent;
+    border: none;
+}
+
+.panel-default {
+    border: none;
+}
+.panel-default>.panel-heading {
+    background-image: none;
+    background-color: transparent;
+}
+.panel-heading {
+    border: none;
+}
+.progress {
+    margin-bottom: 0px;
+}
+
+/* Study page controllers*/
+.controllers_wrapper
+{
+    overflow: auto;
+}
+
+/* han_character styles */
+.han_character
+{
+    /*display: inline;*/
+    font-size: 15em;
+    font-family: "SimHei";
+    color: #444444;
+    margin-right: 10px;
+    /*border-radius: 10px;*/
+    /*background-color: #FFC0CB;*/
+    /*line-height: 1.2;*/
+}
+
+.prettyprint
+{
+    padding: 10px;
+    background-color: #C7EDCC;
+    border: 1px solid #666666;
+}
