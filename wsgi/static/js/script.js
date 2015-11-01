@@ -1,27 +1,34 @@
-var stats = {'grasped': 50, 'new': 30, 'studying': 20};
-var progress = {'max': 60, 'now': 28};
-// var hanzis = ['王', '张'];
+// var stats = {'grasped': 50, 'new': 30, 'studying': 20};
 var unknowns = ['东', '夏'];
 var hanziIndex = 1;
+
+var API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
+var API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
 
 var StudyComponent = React.createClass({
     // main study component  
     getInitialState: function() {
         return {
-            'progress': {
-                'max': 0,
-                'now': 0
-            }, 
             'hanziIndex': 0,
-            'unknowns': []
+            'unknowns': [],
+            'knowns': []
         };
     },
     componentDidMount: function() {
-        var component = this;
-        $.get("/api/study/hanzi_study_count/2", function(data) {
-            console.log(data);
-            component.setState(data);
-        });
+        var oldState = this.state;
+        this.setState(oldState);
+    },
+    addToKnowns: function() {
+        var oldState = this.state;
+        oldState.knowns.push(this.props.hanzis[oldState.hanziIndex]);
+        oldState.hanziIndex += 1;
+        this.setState(oldState);
+    },
+    addToUnknowns: function() {
+        var oldState = this.state;
+        oldState.unknowns.push(this.props.hanzis[oldState.hanziIndex]);
+        oldState.hanziIndex += 1;
+        this.setState(oldState);
     },
     render: function() {
         var unknownBadges = this.state.unknowns.map(function(unknown){
@@ -39,11 +46,11 @@ var StudyComponent = React.createClass({
                     <ReactBootstrap.Label bsStyle='info'>Studying: {this.props.stats.studying}</ReactBootstrap.Label>
                     <ReactBootstrap.Label bsStyle='success'>grasped: {this.props.stats.grasped}</ReactBootstrap.Label>
                 </div>
-                <ReactBootstrap.ProgressBar max={this.state.progress.max} now={this.state.progress.now} bsStyle="success" label="%(now)s of %(max)s" />
-                <div className="han_character">
+                <ReactBootstrap.ProgressBar max={this.props.hanzis.length} now={this.state.hanziIndex+1} bsStyle="success" label="%(now)s of %(max)s" />
+                <div className="han_character" onClick={this.addToKnowns}>
                     {hanzi}
                 </div>
-                    <ReactBootstrap.Button bsStyle="info">Add To Recap</ReactBootstrap.Button>
+                    <ReactBootstrap.Button bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>
                 <div>
                     {unknownBadges}
                 </div>
@@ -59,28 +66,28 @@ var StudyComponent = React.createClass({
 var HornbookComponent = React.createClass({
     getInitialState: function() {
         return {
+            'hanzis': [],
+            'stats': {}
         };
     },
     componentDidMount: function() {
         var component = this;
-        $.get("/api/study/hanzi_study_record/leitner_record", function(data) {
-            console.log(data);
-            hanzis = data.map(function(studyRecord){
+        $.when($.get(API_LEITNER_RECORD_URL), $.get(API_PROGRESS_URL))
+        .done(function(leitnerRecordResp, progressResp){
+            var hanzis = leitnerRecordResp[0].map(function(studyRecord) {
                     return studyRecord['hanzi']
                 });
-            console.log(data);
             component.setState({
-                'hanzis': hanzis 
+                'hanzis': hanzis,
+                'stats': progressResp[0]
             });
         });
     },
     render: function() {
-        console.log(this.state);
         return (
-            <StudyComponent stats={stats} hanzis={this.state.hanzis}/>
+            <StudyComponent hanzis={this.state.hanzis} stats={this.state.stats}/>
         );
     }
-
 });
 
 

@@ -50,10 +50,27 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             return self._set_leitner_record(request)
 
+    @list_route(methods=['GET'])
+    def progress(self, request):
+        return self._get_progress(request)
+
     def perform_create(self, serializer):
         hanzi_data = self.request.data['hanzi']
         hanzi, _ = Hanzi.objects.get_or_create(content=hanzi_data)
         serializer.save(user=self.request.user, hanzi=hanzi)
+
+    def _get_progress(self, request):
+        countNew = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C').count()
+        countGrasped = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R').count()
+        countStudying = HanziStudyRecord.objects.count() - countNew - countGrasped
+
+        ret = {
+            'new': countNew,
+            'studying': countStudying,
+            'grasped': countGrasped,
+            }
+
+        return Response(ret)
 
     def _get_leitner_record(self, request):
         '''
