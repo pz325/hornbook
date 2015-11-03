@@ -45,6 +45,8 @@ body {
     font-family: "SimHei";
     color: #444444;
     margin-right: 10px;
+    cursor: pointer;
+    cursor: hand;
     /*border-radius: 10px;*/
     /*background-color: #FFC0CB;*/
     /*line-height: 1.2;*/

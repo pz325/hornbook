@@ -1,3 +1,38 @@
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/array/shuffle [v1.0]
+var shuffle = function(o){ //v1.0
+    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+};
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
 // var stats = {'grasped': 50, 'new': 30, 'studying': 20};
 var unknowns = ['东', '夏'];
 var hanziIndex = 1;
@@ -19,16 +54,52 @@ var StudyComponent = React.createClass({
         this.setState(oldState);
     },
     addToKnowns: function() {
-        var oldState = this.state;
-        oldState.knowns.push(this.props.hanzis[oldState.hanziIndex]);
-        oldState.hanziIndex += 1;
-        this.setState(oldState);
+        this.updateProgress(true);
     },
     addToUnknowns: function() {
+        this.updateProgress(false);
+    },
+    updateProgress: function(addToKnowns) {
         var oldState = this.state;
-        oldState.unknowns.push(this.props.hanzis[oldState.hanziIndex]);
+        if (addToKnowns) {
+            oldState.knowns.push(this.props.hanzis[oldState.hanziIndex]);            
+        } else {
+            oldState.unknowns.push(this.props.hanzis[oldState.hanziIndex]);            
+        }
+        
         oldState.hanziIndex += 1;
-        this.setState(oldState);
+        if (oldState.hanziIndex < this.props.hanzis.length) {
+            this.setState(oldState);
+        } else {
+            var hanzisToRecap = this.props.recapMode ? 
+                shuffle(this.props.hanzis):
+                shuffle(this.state.unknowns);
+            oldState.hanziIndex = 0;
+            oldState.unknowns = [];
+            if (!this.props.recapMode) {
+                this.commitResult();
+            }
+            // recap
+            this.props.recap(hanzisToRecap);
+        }
+    },
+    commitResult: function() {
+        // commit to server
+        var data = {
+            "grasped_hanzi": this.state.knowns,
+            "new_hanzi": this.state.unknowns
+        };
+        console.log(data);
+        $.post(API_LEITNER_RECORD_URL, JSON.stringify(data), function(resp){
+            console.log(resp);
+        });
+    },
+    getAddToRecapButton: function() {
+        if (!this.props.recapMode) {
+            return (<ReactBootstrap.Button bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>);
+        } else {
+            return 'Recap mode';
+        }
     },
     render: function() {
         var unknownBadges = this.state.unknowns.map(function(unknown){
@@ -47,10 +118,10 @@ var StudyComponent = React.createClass({
                     <ReactBootstrap.Label bsStyle='success'>grasped: {this.props.stats.grasped}</ReactBootstrap.Label>
                 </div>
                 <ReactBootstrap.ProgressBar max={this.props.hanzis.length} now={this.state.hanziIndex+1} bsStyle="success" label="%(now)s of %(max)s" />
-                <div className="han_character" onClick={this.addToKnowns}>
-                    {hanzi}
+                <div>
+                    <span className="han_character" onClick={this.addToKnowns}>{hanzi}</span>
                 </div>
-                    <ReactBootstrap.Button bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>
+                    {this.getAddToRecapButton()}
                 <div>
                     {unknownBadges}
                 </div>
@@ -67,8 +138,15 @@ var HornbookComponent = React.createClass({
     getInitialState: function() {
         return {
             'hanzis': [],
-            'stats': {}
+            'stats': {},
+            'recapMode': false
         };
+    },
+    recap: function(newHanzis) {
+        var oldState = this.state;
+        oldState.hanzis = newHanzis;
+        oldState.recapMode = true;
+        this.setState(oldState);
     },
     componentDidMount: function() {
         var component = this;
@@ -85,7 +163,7 @@ var HornbookComponent = React.createClass({
     },
     render: function() {
         return (
-            <StudyComponent hanzis={this.state.hanzis} stats={this.state.stats}/>
+            <StudyComponent hanzis={this.state.hanzis} stats={this.state.stats} recap={this.recap} recapMode={this.state.recapMode}/>
         );
     }
 });
