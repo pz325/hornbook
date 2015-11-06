@@ -14,6 +14,8 @@ from leitner import is_last_number_on_deck
 from leitner import to_review
 from leitner import decks_to_review
 
+import json
+
 
 def _create_one_HanziStudyCount_instance(user, count):
     return HanziStudyCount.objects.create(
@@ -285,13 +287,12 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
     def test_get_leitner_record_with_num_retired(self):
         # arrange
+        retired_hanzis = [u'北', u'春', u'夏', u'冬']
         _create_one_leitner_record(self.user, u'东', 'C')
         _create_one_leitner_record(self.user, u'南', '1')
         _create_one_leitner_record(self.user, u'西', '3')
-        _create_one_leitner_record(self.user, u'北', 'R')
-        _create_one_leitner_record(self.user, u'春', 'R')
-        _create_one_leitner_record(self.user, u'夏', 'R')
-        _create_one_leitner_record(self.user, u'东', 'R')
+        for h in retired_hanzis:
+            _create_one_leitner_record(self.user, h, 'R')
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
@@ -302,6 +303,9 @@ class HanziStudyRecordViewSetTests(APITestCase):
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)  # two from deck R
+        for resp_data in response.data:
+            if resp_data['hanzi'] in retired_hanzis:
+                self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=resp_data['hanzi'])).repeat_count, 1)
 
     def test_set_leitner_record(self):
         # arrange
@@ -313,11 +317,11 @@ class HanziStudyRecordViewSetTests(APITestCase):
         # act
         url = reverse('hanzistudyrecord-list') + '/leitner_record'
         data = {
-            'grasped_hanzi': [u'东', u'西'],   # 东 -> deck 1, 西 -> deck R
-            'new_hanzi': [u'北', u'南']        # 北 -> deck C, new Hanzi, 南 -> deck C
+            'grasped_hanzi': json.dumps([u'东', u'西']),   # 东 -> deck 1, 西 -> deck R
+            'new_hanzi': json.dumps([u'北', u'南'])        # 北 -> deck C, new Hanzi, 南 -> deck C
         }
 
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, data)
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)

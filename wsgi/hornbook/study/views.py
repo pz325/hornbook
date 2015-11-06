@@ -87,9 +87,14 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         for i in deck_ids:
             ret = ret + [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck=i)]  # progres deck
 
-        retired_deck = [h for h in HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')]
-        random.shuffle(retired_deck)
-        ret = ret + retired_deck[:num_retired]
+        retired_deck = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='R')
+        index = range(0, len(retired_deck))
+        random.shuffle(index)
+        picked_retired = [retired_deck[i] for i in index[:num_retired]]
+        for r in picked_retired:
+            r.repeat_count += 1
+            r.save()
+        ret = ret + [h for h in picked_retired]
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
         return Response(serializer.data)
@@ -106,8 +111,10 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         new_hanzi_key = 'new_hanzi'
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
-
         study_count = HanziStudyCount.objects.get(user=request.user)
+
+        grasped_hanzi = jsonpickle.decode(grasped_hanzi)
+        new_hanzi = jsonpickle.decode(new_hanzi)
 
         for hanzi in grasped_hanzi:
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)

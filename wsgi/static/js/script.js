@@ -71,27 +71,36 @@ var StudyComponent = React.createClass({
         if (oldState.hanziIndex < this.props.hanzis.length) {
             this.setState(oldState);
         } else {
+            if (!this.props.recapMode) {
+                this.commitResult();
+            }
             var hanzisToRecap = this.props.recapMode ? 
                 shuffle(this.props.hanzis):
                 shuffle(this.state.unknowns);
             oldState.hanziIndex = 0;
             oldState.unknowns = [];
-            if (!this.props.recapMode) {
-                this.commitResult();
-            }
             // recap
             this.props.recap(hanzisToRecap);
         }
     },
     commitResult: function() {
         // commit to server
-        var data = {
+        var result = {
             "grasped_hanzi": this.state.knowns,
             "new_hanzi": this.state.unknowns
         };
-        console.log(data);
-        $.post(API_LEITNER_RECORD_URL, JSON.stringify(data), function(resp){
-            console.log(resp);
+        console.log(result);
+        $.ajax({
+            type: "POST",
+            url: API_LEITNER_RECORD_URL,
+            data: {
+                grasped_hanzi: JSON.stringify(this.state.knowns), 
+                new_hanzi: JSON.stringify(this.state.unknowns)
+            },
+            //data: data,
+            dataType: "json",
+            success: function(resp) {
+                console.log(resp); }
         });
     },
     getAddToRecapButton: function() {
