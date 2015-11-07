@@ -33,12 +33,37 @@ $.ajaxSetup({
     }
 });
 
-// var stats = {'grasped': 50, 'new': 30, 'studying': 20};
-var unknowns = ['东', '夏'];
-var hanziIndex = 1;
-
 var API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
 var API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
+
+var StatComponent = React.createClass({
+    render: function() {
+        return (
+            <div>
+                <ReactBootstrap.Label bsStyle='warning'>New: {this.props.stats.new}</ReactBootstrap.Label>
+                <ReactBootstrap.Label bsStyle='info'>Studying: {this.props.stats.studying}</ReactBootstrap.Label>
+                <ReactBootstrap.Label bsStyle='success'>grasped: {this.props.stats.grasped}</ReactBootstrap.Label>
+            </div>
+        );
+    }
+});
+
+var NewContentComponent = React.createClass({
+    render: function() {
+        const addButton = <ReactBootstrap.Button bsStyle="info"><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
+        const stats = <StatComponent stats={this.props.stats} />;
+        return (
+            <div>
+                <hr/>
+                <div className="stat">
+                    <ReactBootstrap.Input type="text" placeholder="new content" ref="new_content" 
+                        addonBefore={stats}
+                        buttonAfter={addButton}/>                
+                </div>
+            </div>
+        );
+    }
+});
 
 var StudyComponent = React.createClass({
     // main study component  
@@ -120,12 +145,6 @@ var StudyComponent = React.createClass({
         } 
         return (
             <div>
-                <hr/>
-                <div>
-                    <ReactBootstrap.Label bsStyle='warning'>New: {this.props.stats.new}</ReactBootstrap.Label>
-                    <ReactBootstrap.Label bsStyle='info'>Studying: {this.props.stats.studying}</ReactBootstrap.Label>
-                    <ReactBootstrap.Label bsStyle='success'>grasped: {this.props.stats.grasped}</ReactBootstrap.Label>
-                </div>
                 <ReactBootstrap.ProgressBar max={this.props.hanzis.length} now={this.state.hanziIndex+1} bsStyle="success" label="%(now)s of %(max)s" />
                 <div>
                     <span className="han_character" onClick={this.addToKnowns}>{hanzi}</span>
@@ -172,7 +191,10 @@ var HornbookComponent = React.createClass({
     },
     render: function() {
         return (
-            <StudyComponent hanzis={this.state.hanzis} stats={this.state.stats} recap={this.recap} recapMode={this.state.recapMode}/>
+            <div>
+                <NewContentComponent stats={this.state.stats}/>
+                <StudyComponent hanzis={this.state.hanzis} recap={this.recap} recapMode={this.state.recapMode}/>
+            </div>
         );
     }
 });

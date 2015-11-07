@@ -58,3 +58,9 @@ body {
     background-color: #C7EDCC;
     border: 1px solid #666666;
 }
+
+.stat
+{
+    padding-bottom: 10px;
+    display: inline;
+}
