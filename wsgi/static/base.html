@@ -23,20 +23,44 @@
     {% block extra_head %}{% endblock %}
   </head>
   <body>
-    {% if user.is_authenticated %}
-    <li><a href='/accounts/logout/'>Log out</a></li>
-    {% else %}
-    <li><a href="/accounts/login/">Log in</a></li>
-    {% endif %}
-    <li>{{user.username}}</li>
+    <div>
+    <!-- nav bar -->
+      <nav class="navbar navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand">Horn Book</span>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li id="nav_hanzi" ><a href="/study/">认字</a></li>
+              <li id="nav_writing" ><a href=#>写字</a></li>
+              <li id="nav_poen" ><a href=#>古诗</a></li>
+              <li id="nav_new_list" ><a href=#><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href=# style="color: black">{{user.username}}</a></li>
+              {% if user.is_authenticated %}
+              <li><a href='/accounts/logout/'>Log out</a></li>
+              {% else %}
+              <li id="nav_accounts" ><a href="/accounts/login/">Log in</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
     
+      {% block content %}{% endblock %}
     
-    {% block content %}{% endblock %}
-    
-    <div class="footer">
-      <p class="text-center">Copyright © 2013 - 2016 Ping Zou All Rights Reserved </p>
+      <div class="footer">
+        <p class="text-center">Copyright © 2013 - 2016 Ping Zou All Rights Reserved </p>
+      </div>
     </div>
-    
     {% block js %}{% endblock %}
   </body>
 </html>  
