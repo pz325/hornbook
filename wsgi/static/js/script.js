@@ -51,6 +51,7 @@ var StatComponent = React.createClass({
 var NewContentComponent = React.createClass({
     getInitialState() {
         return {
+            'showModal': false,
             'newContents': []
         };
     },
@@ -60,13 +61,35 @@ var NewContentComponent = React.createClass({
         this.setState(oldState);
     },
     handleAddButtonClick() {
-        // to save
-        this.props.recap(this.refs.newContents.getValue().match(/\S+/g));
+        if (this.state.newContents.length > 0) {
+            this.show();
+        }
+    },
+    show() {
+        var oldState = this.state;
+        oldState.showModal = true;
+        this.setState(oldState);
+    },
+    close() {
+        var oldState = this.state;
+        oldState.showModal = false;
+        this.setState(oldState);
+    },
+    closeWithoutSavingToServer() {
+        this.close();
+        this.props.recap(this.state.newContents);
+    },
+    saveNewContentToServer(){
+        closeWithoutSavingToServer();
+        $.ajax({
+            // post to server
+        });
     },
     render: function() {
         const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         const stats = <StatComponent stats={this.props.stats} />;
         const newContents = this.state.newContents.join();
+
         return (
             <div>
                 <hr/>
@@ -80,6 +103,22 @@ var NewContentComponent = React.createClass({
                         buttonAfter={addButton}
                         help={"new contents: " + newContents}/>                
                 </div>
+                <ReactBootstrap.Modal show={this.state.showModal} onHide={this.closeWithoutSavingToServer}>
+                    <ReactBootstrap.Modal.Header closeButton>
+                        <ReactBootstrap.Modal.Title>Save the following new contents to server</ReactBootstrap.Modal.Title>
+                    </ReactBootstrap.Modal.Header>
+                    <ReactBootstrap.Modal.Body>
+                        <div>
+                            {newContents}
+                        </div>
+                    </ReactBootstrap.Modal.Body>
+                    <ReactBootstrap.Modal.Footer>
+                        <ReactBootstrap.ButtonToolbar>
+                            <ReactBootstrap.Button bsStyle="info" onClick={this.saveNewContentToServer}>Save</ReactBootstrap.Button>
+                            <ReactBootstrap.Button onClick={this.closeWithoutSavingToServer}>No</ReactBootstrap.Button>
+                        </ReactBootstrap.ButtonToolbar>
+                    </ReactBootstrap.Modal.Footer>
+                </ReactBootstrap.Modal>
             </div>
         );
     }
