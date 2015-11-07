@@ -49,16 +49,36 @@ var StatComponent = React.createClass({
 });
 
 var NewContentComponent = React.createClass({
+    getInitialState() {
+        return {
+            'newContents': []
+        };
+    },
+    handleNewContentsInputChange() {
+        var oldState = this.state;
+        oldState.newContents = this.refs.newContents.getValue().match(/\S+/g);
+        this.setState(oldState);
+    },
+    handleAddButtonClick() {
+        // to save
+        this.props.recap(this.refs.newContents.getValue().match(/\S+/g));
+    },
     render: function() {
-        const addButton = <ReactBootstrap.Button bsStyle="info"><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
+        const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         const stats = <StatComponent stats={this.props.stats} />;
+        const newContents = this.state.newContents.join();
         return (
             <div>
                 <hr/>
                 <div className="stat">
-                    <ReactBootstrap.Input type="text" placeholder="new content" ref="new_content" 
+                    <ReactBootstrap.Input 
+                        type="text" 
+                        placeholder="new content. space to separate" 
+                        ref="newContents" 
+                        onChange={this.handleNewContentsInputChange}
                         addonBefore={stats}
-                        buttonAfter={addButton}/>                
+                        buttonAfter={addButton}
+                        help={"new contents: " + newContents}/>                
                 </div>
             </div>
         );
@@ -192,8 +212,8 @@ var HornbookComponent = React.createClass({
     render: function() {
         return (
             <div>
-                <NewContentComponent stats={this.state.stats}/>
-                <StudyComponent hanzis={this.state.hanzis} recap={this.recap} recapMode={this.state.recapMode}/>
+                <NewContentComponent stats={this.state.stats} recap={this.recap} />
+                <StudyComponent hanzis={this.state.hanzis} recap={this.recap} recapMode={this.state.recapMode} />
             </div>
         );
     }
