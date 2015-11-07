@@ -33,8 +33,37 @@ $.ajaxSetup({
     }
 });
 
-var API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
-var API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
+var StudyAPI = (function() {
+    const API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
+    const API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
+    
+    /*
+     * @param knowns an array
+     * @param unknowns an array
+     * @return $.ajax()
+     */
+    var updateLeitnerRecord = function(knowns, unknowns) {
+        return $.ajax({
+            type: "POST",
+            url: API_LEITNER_RECORD_URL,
+            data: {
+                grasped_hanzi: JSON.stringify(knowns), 
+                new_hanzi: JSON.stringify(unknowns)
+            },
+            //data: data,
+            dataType: "json",
+            success: function(resp) {
+                console.log(resp); }
+            });
+    };
+
+    return {
+        API_LEITNER_RECORD_URL: API_LEITNER_RECORD_URL,
+        API_PROGRESS_URL: API_PROGRESS_URL,
+        updateLeitnerRecord: updateLeitnerRecord
+    };
+})();
+
 
 var StatComponent = React.createClass({
     render: function() {
@@ -51,12 +80,14 @@ var StatComponent = React.createClass({
 var NewContentComponent = React.createClass({
     getInitialState() {
         return {
+            'rawNewContents': "",
             'showModal': false,
             'newContents': []
         };
     },
-    handleNewContentsInputChange() {
+    handleNewContentsInputChange(event) {
         var oldState = this.state;
+        oldState.rawNewContents = event.target.value;
         oldState.newContents = this.refs.newContents.getValue().match(/\S+/g);
         this.setState(oldState);
     },
@@ -75,27 +106,35 @@ var NewContentComponent = React.createClass({
         oldState.showModal = false;
         this.setState(oldState);
     },
+    reset() {
+        var oldState = this.state;
+        oldState.rawNewContents = "";
+        oldState.newContents = [];
+        oldState.showModal = false;
+        this.setState(oldState);
+    },
     closeWithoutSavingToServer() {
         this.close();
         this.props.recap(this.state.newContents);
+        this.reset();
     },
     saveNewContentToServer(){
-        closeWithoutSavingToServer();
-        $.ajax({
-            // post to server
-        });
+        this.closeWithoutSavingToServer();
+        StudyAPI.updateLeitnerRecord([], this.state.newContents);
+        this.reset();
     },
     render: function() {
         const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         const stats = <StatComponent stats={this.props.stats} />;
-        const newContents = this.state.newContents.join();
+        const newContents = this.state.newContents ? this.state.newContents.join() : "";
 
         return (
             <div>
                 <hr/>
                 <div className="stat">
                     <ReactBootstrap.Input 
-                        type="text" 
+                        type="text"
+                        value={this.state.rawNewContents}
                         placeholder="new content. space to separate" 
                         ref="newContents" 
                         onChange={this.handleNewContentsInputChange}
@@ -174,18 +213,7 @@ var StudyComponent = React.createClass({
             "new_hanzi": this.state.unknowns
         };
         console.log(result);
-        $.ajax({
-            type: "POST",
-            url: API_LEITNER_RECORD_URL,
-            data: {
-                grasped_hanzi: JSON.stringify(this.state.knowns), 
-                new_hanzi: JSON.stringify(this.state.unknowns)
-            },
-            //data: data,
-            dataType: "json",
-            success: function(resp) {
-                console.log(resp); }
-        });
+        StudyAPI.updateLeitnerRecord(this.state.knowns, this.state.unknowns);
     },
     getAddToRecapButton: function() {
         if (!this.props.recapMode) {
@@ -237,7 +265,7 @@ var HornbookComponent = React.createClass({
     },
     componentDidMount: function() {
         var component = this;
-        $.when($.get(API_LEITNER_RECORD_URL), $.get(API_PROGRESS_URL))
+        $.when($.get(StudyAPI.API_LEITNER_RECORD_URL), $.get(StudyAPI.API_PROGRESS_URL))
         .done(function(leitnerRecordResp, progressResp){
             var hanzis = leitnerRecordResp[0].map(function(studyRecord) {
                     return studyRecord['hanzi']
