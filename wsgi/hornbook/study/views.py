@@ -9,15 +9,29 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from study.models import HanziStudyCount
 from study.models import HanziStudyRecord
+from study.models import Category
 from lexicon.models import Hanzi
 
 from study.serializers import HanziStudyCountSerializer
 from study.serializers import HanziStudyRecordSerializer
 from study.serializers import UserSerializer
+from study.serializers import CategorySerializer
 
 import leitner
 import random
 import jsonpickle
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_class = (permissions.IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
 
 
 class HanziStudyCountViewSet(viewsets.ModelViewSet):
@@ -42,6 +56,21 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return HanziStudyRecord.objects.filter(user=self.request.user)
+        # if 'category' in self.request.data:
+        #     category_instance = Category.objects.get(name=self.request.data['category'])
+        #     if category_instance:
+        #         return HanziStudyRecord.objects.filter(user=self.request.user, category=category_instance)
+        #     else:
+        #         return []
+        # else:
+        #     return HanziStudyRecord.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        hanzi_data = self.request.data['hanzi']
+        category_data = self.request.data['category']
+        hanzi, _ = Hanzi.objects.get_or_create(content=hanzi_data)
+        category, _ = Category.objects.get_or_create(name=category_data)
+        serializer.save(user=self.request.user, hanzi=hanzi, category=category)
 
     @list_route(methods=['GET', 'POST'])
     def leitner_record(self, request):
@@ -53,11 +82,6 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
     @list_route(methods=['GET'])
     def progress(self, request):
         return self._get_progress(request)
-
-    def perform_create(self, serializer):
-        hanzi_data = self.request.data['hanzi']
-        hanzi, _ = Hanzi.objects.get_or_create(content=hanzi_data)
-        serializer.save(user=self.request.user, hanzi=hanzi)
 
     def _get_progress(self, request):
         countNew = HanziStudyRecord.objects.filter(user=request.user, leitner_deck='C').count()

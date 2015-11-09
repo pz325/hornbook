@@ -22,7 +22,7 @@ from rest_framework import routers
 from study.views import HanziStudyCountViewSet
 from study.views import HanziStudyRecordViewSet
 from study.views import UserViewSet
-
+from study.views import CategoryViewSet
 
 import lexicon.views
 
@@ -30,6 +30,7 @@ import lexicon.views
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'study/hanzi_study_count', HanziStudyCountViewSet, base_name='hanzistudycount')
 router.register(r'study/hanzi_study_record', HanziStudyRecordViewSet, base_name='hanzistudyrecord')
+router.register(r'study/category', CategoryViewSet, base_name='category')
 router.register(r'study/user', UserViewSet, base_name='user')
 router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet, base_name='hanzi')
 

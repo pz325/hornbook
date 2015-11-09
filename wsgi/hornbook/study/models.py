@@ -20,6 +20,19 @@ STUDY_RECORD_STATUS = (
     )
 
 
+class Category(models.Model):
+    unique_name = models.CharField(max_length=200, editable=False, unique=True, db_index=True)
+    name = models.CharField(max_length=100, db_index=True)
+    user = models.ForeignKey(User, editable=False, db_index=True, related_name='categories')
+
+    def save(self, *args, **kwargs):
+        self.unique_name = '_'.join([self.name, self.user.username])
+        super(Category, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.name
+
+
 class StudyRecord(models.Model):
     user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_records')
     study_date = models.DateTimeField(auto_now=True)
@@ -39,7 +52,14 @@ class LeitnerStudyRecord(StudyRecord):
         abstract = True
 
 
-class HanziStudyRecord(LeitnerStudyRecord):
+class CategorisedLeitnerStudyRecord(LeitnerStudyRecord):
+    category = models.ForeignKey(Category, editable=False, blank=True, null=True)  #todo, revert to db_index=True
+
+    class Meta:
+        abstract = True
+
+
+class HanziStudyRecord(CategorisedLeitnerStudyRecord):
     hanzi = models.ForeignKey(Hanzi, editable=False, db_index=True)
 
 
@@ -51,3 +71,4 @@ class HanziStudyCount(models.Model):
 
 admin.site.register(HanziStudyRecord)
 admin.site.register(HanziStudyCount)
+admin.site.register(Category)
