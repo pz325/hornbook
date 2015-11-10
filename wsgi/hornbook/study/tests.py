@@ -7,6 +7,7 @@ from rest_framework import status
 
 from study.models import HanziStudyCount
 from study.models import HanziStudyRecord
+from study.models import Category
 from lexicon.models import Hanzi
 from django.contrib.auth.models import User
 
@@ -15,6 +16,14 @@ from leitner import to_review
 from leitner import decks_to_review
 
 import json
+from random import randint
+
+
+def _create_one_Category_instance(user, name):
+    return Category.objects.create(
+        user=user,
+        name=name
+        )
 
 
 def _create_one_HanziStudyCount_instance(user, count):
@@ -42,6 +51,94 @@ def _create_one_leitner_record(user, hanzi, deck_id):
         user=user,
         hanzi=hanzi_instance,
         leitner_deck=deck_id)
+
+
+class CategoryTests(APITestCase):
+    def setUp(self):
+        self.username = 'test_user'
+        self.user = _create_one_User_instance(self.username)
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_Category(self):
+        # arrange
+        url = reverse('category-list')
+        name = 'category'
+        data = {'name': name}
+
+        # act
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Category.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Category.objects.get(user=self.user).name, name)
+
+    def test_list_Category(self):
+        # arrange
+        name = 'category'
+        _create_one_Category_instance(self.user, name)
+
+        # act
+        url = reverse('category-list')
+        response = self.client.get(url, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['name'], name)
+
+    def test_get_one_Category(self):
+        # arrange
+        numToCreate = randint(20, 40)
+        names = self._create_Category_instances(numToCreate)
+        index = randint(0, numToCreate)
+
+        # act
+        url = reverse('category-detail', args=[index+1])  # index is 0 based, but API pk is 1 based
+        response = self.client.get(url)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], names[index])
+
+    def test_put_one_Category(self):
+        # arrange
+        numToCreate = randint(20, 40)
+        self._create_Category_instances(numToCreate)
+        index = randint(0, numToCreate)
+
+        # act
+        nameToBe = 'updated_category'
+        data = {'name': nameToBe}
+        url = reverse('category-detail', args=[index+1])  # index is 0 based, but API pk is 1 based
+        response = self.client.put(url, data=data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Category.objects.filter(user=self.user).count(), numToCreate)
+        self.assertEqual(Category.objects.filter(user=self.user)[index].name, nameToBe)
+
+    def test_delete_one_Category(self):
+        # arrange
+        numToCreate = randint(20, 40)
+        self._create_Category_instances(numToCreate)
+        index = randint(0, numToCreate)
+
+        # act
+        url = reverse('category-detail', args=[index+1])
+        response = self.client.delete(url)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Category.objects.filter(user=self.user).count(), numToCreate-1)
+
+    def _create_Category_instances(self, numToCreate):
+        names = []
+        for i in range(0, numToCreate):
+            name = 'category_' + str(i)
+            names.append(name)
+            _create_one_Category_instance(self.user, name)
+        return names
 
 
 class LeitnerTests(TestCase):
