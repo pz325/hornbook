@@ -7,7 +7,6 @@ import django.utils.timezone
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
-    # user = serializers.HyperlinkedIdentityField(view_name='user-detail')
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:

@@ -17,6 +17,7 @@ from leitner import decks_to_review
 
 import json
 from random import randint
+import unittest
 
 
 def _create_one_Category_instance(user, name):
@@ -37,19 +38,22 @@ def _create_one_User_instance(username):
     return User.objects.create(username=username)
 
 
-def _create_one_HanziStudyRecord_instance(user, hanzi):
+def _create_one_HanziStudyRecord_instance(user, category, hanzi):
     hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
     return HanziStudyRecord.objects.create(
         user=user,
+        category=category,
         hanzi=hanzi_instance
         )
 
 
-def _create_one_leitner_record(user, hanzi, deck_id):
+def _create_one_leitner_record(user, category, hanzi, deck_id):
     hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
+    category_instance, _ = Category.objects.get_or_create(user=user, name=category)
     return HanziStudyRecord.objects.create(
         user=user,
         hanzi=hanzi_instance,
+        category=category_instance,
         leitner_deck=deck_id)
 
 
@@ -245,15 +249,18 @@ class UserViewSetTests(APITestCase):
 
         another_user = _create_one_User_instance('another_user')
         _create_one_HanziStudyCount_instance(another_user, 10)
+
         hanzi = u'王'
-        _create_one_HanziStudyRecord_instance(another_user, hanzi)
+        category = _create_one_Category_instance(another_user, 'category_for_another_user')
+        _create_one_HanziStudyRecord_instance(another_user, category, hanzi)
 
     def test_list_User(self):
         # arrange
         count = 3
         _create_one_HanziStudyCount_instance(self.user, count)
         hanzi = u'风'
-        _create_one_HanziStudyRecord_instance(self.user, hanzi)
+        category = _create_one_Category_instance(self.user, 'category')
+        _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
 
         # act
         url = reverse('user-list')
@@ -273,7 +280,8 @@ class UserViewSetTests(APITestCase):
         count = 3
         _create_one_HanziStudyCount_instance(self.user, count)
         hanzi = u'风'
-        _create_one_HanziStudyRecord_instance(self.user, hanzi)
+        category = _create_one_Category_instance(self.user, 'category')
+        _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
 
         # act
         url = reverse('user-detail', args=[1])
@@ -294,16 +302,18 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         another_user = _create_one_User_instance('another_user')
-        _create_one_HanziStudyRecord_instance(another_user, u'王')
+        another_category = _create_one_Category_instance(another_user, 'category_for_another_user')
+        _create_one_HanziStudyRecord_instance(another_user, another_category, u'王')
 
     def test_list_HanziStudyRecord(self):
         # arrange
         hanzis = [u'东', u'南']
+        category = _create_one_Category_instance(self.user, 'category')
         for h in hanzis:
-            _create_one_HanziStudyRecord_instance(self.user, h)
+            _create_one_HanziStudyRecord_instance(self.user, category, h)
 
         # act
-        url = reverse('hanzistudyrecord-list')
+        url = reverse('hanzistudyrecord-list') + '?category={category}'.format(category=category.name)
         response = self.client.get(url, format='json')
 
         # assert
@@ -314,7 +324,8 @@ class HanziStudyRecordViewSetTests(APITestCase):
         # arrange
         url = reverse('hanzistudyrecord-list')
         hanzi = u'东'
-        data = {'hanzi': hanzi}
+        category = _create_one_Category_instance(self.user, 'category')
+        data = {'hanzi': hanzi, 'category': category.name}
 
         # act
         response = self.client.post(url, data, format='json')
@@ -324,14 +335,17 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 1)
         self.assertEqual(Hanzi.objects.filter(content=hanzi).count(), 1)
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user).hanzi, Hanzi.objects.get(content=hanzi))
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user).category, Category.objects.get(user=self.user, name=category))
 
     def test_get_one_HanziStudyRecord(self):
         # arrange
         hanzi = u'东'
-        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+        category = _create_one_Category_instance(self.user, 'category')
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
 
         # act
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        url += '?category={category}'.format(category=category.name)
         response = self.client.get(url, format='json')
 
         # assert
@@ -341,12 +355,14 @@ class HanziStudyRecordViewSetTests(APITestCase):
     def test_put_one_HanziStudyRecord(self):
         # arrange
         hanzi = u'东'
-        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+        category = _create_one_Category_instance(self.user, 'category')
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
 
         # act
         hanzi = u'王'
-        data = {'hanzi': hanzi}
+        data = {'hanzi': hanzi, 'category': category.name}
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        # url += '?category={category}'.format(category=category.name)
         response = self.client.put(url, data=data, format='json')
 
         # assert
@@ -357,10 +373,12 @@ class HanziStudyRecordViewSetTests(APITestCase):
     def test_delete_one_HanziStudyRecord(self):
         # arrange
         hanzi = u'东'
-        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, hanzi)
+        category = _create_one_Category_instance(self.user, 'category')
+        hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
 
         # act
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
+        url += '?category={category}'.format(category=category.name)
         response = self.client.delete(url)
 
         # assert
@@ -369,13 +387,15 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
     def test_get_leitner_record(self):
         # arrange
-        current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
-        progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
-        progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '3')
+        category = _create_one_Category_instance(self.user, 'category')
+        _create_one_leitner_record(self.user, category.name, u'东', 'C')
+        _create_one_leitner_record(self.user, category.name, u'南', '1')
+        _create_one_leitner_record(self.user, category.name, u'西', '3')
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
         url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        url += '?category={category}'.format(category=category.name)
         response = self.client.get(url, format='json')
 
         # assert
@@ -385,16 +405,18 @@ class HanziStudyRecordViewSetTests(APITestCase):
     def test_get_leitner_record_with_num_retired(self):
         # arrange
         retired_hanzis = [u'北', u'春', u'夏', u'冬']
-        _create_one_leitner_record(self.user, u'东', 'C')
-        _create_one_leitner_record(self.user, u'南', '1')
-        _create_one_leitner_record(self.user, u'西', '3')
+        category = _create_one_Category_instance(self.user, 'category')
+        _create_one_leitner_record(self.user, category.name, u'东', 'C')
+        _create_one_leitner_record(self.user, category.name, u'南', '1')
+        _create_one_leitner_record(self.user, category.name, u'西', '3')
         for h in retired_hanzis:
-            _create_one_leitner_record(self.user, h, 'R')
+            _create_one_leitner_record(self.user, category.name, h, 'R')
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
         num_retired = 2
         url = reverse('hanzistudyrecord-list') + '/leitner_record?num_retired={num_retired}'.format(num_retired=num_retired)
+        url += '&category={category}'.format(category=category.name)
         response = self.client.get(url, format='json')
 
         # assert
@@ -406,14 +428,16 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
     def test_set_leitner_record(self):
         # arrange
-        current_deck_instance = _create_one_leitner_record(self.user, u'东', 'C')
-        progress_1_deck_instance = _create_one_leitner_record(self.user, u'南', '1')
-        progress_2_deck_instance = _create_one_leitner_record(self.user, u'西', '2')
+        category = _create_one_Category_instance(self.user, 'category')
+        _create_one_leitner_record(self.user, category.name, u'东', 'C')
+        _create_one_leitner_record(self.user, category.name, u'南', '1')
+        _create_one_leitner_record(self.user, category.name, u'西', '2')
         _create_one_HanziStudyCount_instance(self.user, 1)
 
         # act
         url = reverse('hanzistudyrecord-list') + '/leitner_record'
         data = {
+            'category': category.name,
             'grasped_hanzi': json.dumps([u'东', u'西']),   # 东 -> deck 1, 西 -> deck R
             'new_hanzi': json.dumps([u'北', u'南'])        # 北 -> deck C, new Hanzi, 南 -> deck C
         }

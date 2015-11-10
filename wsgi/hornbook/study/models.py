@@ -53,7 +53,7 @@ class LeitnerStudyRecord(StudyRecord):
 
 
 class CategorisedLeitnerStudyRecord(LeitnerStudyRecord):
-    category = models.ForeignKey(Category, editable=False, blank=True, null=True)  #todo, revert to db_index=True
+    category = models.ForeignKey(Category, editable=False, db_index=True)  # todo, revert to db_index=True
 
     class Meta:
         abstract = True
@@ -72,3 +72,11 @@ class HanziStudyCount(models.Model):
 admin.site.register(HanziStudyRecord)
 admin.site.register(HanziStudyCount)
 admin.site.register(Category)
+
+
+def populateDefaultCategory(username):
+    user = User.objects.get(username=username)
+    category = Category.objects.filter(user=user)[0]
+    for r in HanziStudyRecord.objects.filter(user=user):
+        r.category = category
+        r.save()
