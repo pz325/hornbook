@@ -103,7 +103,7 @@ else:
     db_host = 'localhost'
     db_port = '3306'
     db_userame = 'root'
-    db_password = 'your_password'
+    db_password = '111325'
 
 
 DATABASES = {
@@ -114,7 +114,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': db_host,
+        'NAME': 'hornbook',
         'USER': db_userame,
         'PASSWORD': db_password,
         'HOST': db_host,   # Or an IP Address that your DB is hosted on
