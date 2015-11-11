@@ -40,8 +40,8 @@ urlpatterns = [
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
-    # url(r'^$', TemplateView.as_view(template_name='index.html')),
     url(r'^$', 'hornbook.views.index'),
+    url(r'^study/$', 'hornbook.views.study'),
 
     # log in/out
     url(r'^accounts/login/$', 'django.contrib.auth.views.login',

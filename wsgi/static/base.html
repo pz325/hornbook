@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>  
 <html lang="en">  
   <head>
@@ -38,9 +39,9 @@
           </div>
           <div class="collapse navbar-collapse" id="hornbook_main_navbar">
             <ul class="nav navbar-nav">
-              <li id="nav_hanzi" ><a href="/study/"><span class="sr-only">认字</span></a></li>
-              <li id="nav_writing" ><a href=#>写字</a></li>
-              <li id="nav_poen" ><a href=#>古诗</a></li>
+              <li id="nav_hanzi" ><a href="/study?category=read_hanzi">认字</a></li>
+              <li id="nav_writing" ><a href="/study?category=write_hanzi">写字</a></li>
+              <li id="nav_poen" ><a href="/study?category=chinese_poem">古诗</a></li>
               <li role="separator" class="divider"></li>
               <li id="nav_new_list" ><a href=#><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a></li>
             </ul>

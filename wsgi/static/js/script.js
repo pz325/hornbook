@@ -269,7 +269,7 @@ var StudyComponent = React.createClass({
 });
 
 
-var CATEGORY='read_hanzi';
+var CATEGORY = $("#content").attr("category");
 
 var HornbookComponent = React.createClass({
     getInitialState: function() {
@@ -300,6 +300,7 @@ var HornbookComponent = React.createClass({
         });
     },
     render: function() {
+        console.log(this.props);
         return (
             <div>
                 <NewContentComponent stats={this.state.stats} recap={this.recap} category={CATEGORY} />
