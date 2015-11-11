@@ -94,33 +94,31 @@ WSGI_APPLICATION = 'hornbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-if 'OPENSHIFT_DB_HOST' in os.environ:
-    db_host = os.environ['OPENSHIFT_MYSQL_DB_SOCKET']
-    db_port = os.environ['OPENSHIFT_MYSQL_DB_PORT']
-    db_userame = os.environ['OPENSHIFT_MYSQL_DB_USERNAME']
-    db_password = os.environ['OPENSHIFT_MYSQL_DB_PASSWORD']
-else:
-    db_host = 'localhost'
-    db_port = '3306'
-    db_userame = 'root'
-    db_password = '111325'
+# a setting to determine whether we are running on OpenShift
+ON_OPENSHIFT = False
+if 'OPENSHIFT_REPO_DIR' in os.environ:
+    ON_OPENSHIFT = True
 
-
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     # GETTING-STARTED: change 'db.sqlite3' to your sqlite3 database:
-    #     'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
-    # }
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hornbook',
-        'USER': db_userame,
-        'PASSWORD': db_password,
-        'HOST': db_host,   # Or an IP Address that your DB is hosted on
-        'PORT': db_port,
+if ON_OPENSHIFT:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'hornbook',
+            'USER': os.environ['OPENSHIFT_MYSQL_DB_USERNAME'],
+            'PASSWORD': os.environ['OPENSHIFT_MYSQL_DB_PASSWORD'],
+            'HOST': os.environ['OPENSHIFT_MYSQL_DB_HOST'],
+            'PORT': os.environ['OPENSHIFT_MYSQL_DB_PORT']
+        }
     }
-}
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            # GETTING-STARTED: change 'db.sqlite3' to your sqlite3 database:
+            'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
