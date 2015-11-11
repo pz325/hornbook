@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'hornbook.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 if 'OPENSHIFT_DB_HOST' in os.environ:
-    db_host = os.environ['OPENSHIFT_MYSQL_DB_HOST']
+    db_host = os.environ['OPENSHIFT_MYSQL_DB_SOCKET']
     db_port = os.environ['OPENSHIFT_MYSQL_DB_PORT']
     db_userame = os.environ['OPENSHIFT_MYSQL_DB_USERNAME']
     db_password = os.environ['OPENSHIFT_MYSQL_DB_PASSWORD']
