@@ -43,10 +43,24 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        category_instance = self._get_category()
+        serializer.save(user=self.request.user, category=category_instance)
 
     def get_queryset(self):
-        return HanziStudyCount.objects.filter(user=self.request.user)
+        '''
+        filter by user and category
+        '''
+        category_instance = self._get_category()
+        return HanziStudyCount.objects.filter(user=self.request.user, category=category_instance)
+
+    def _get_category(self):
+        category_key = 'category'
+        if category_key in self.request.query_params:
+            category_data = self.request.query_params[category_key]
+        if category_key in self.request.data:
+            category_data = self.request.data[category_key]
+        category_instance = get_object_or_404(Category, user=self.request.user, name=category_data)
+        return category_instance
 
 
 class HanziStudyRecordViewSet(viewsets.ModelViewSet):
@@ -64,8 +78,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         if category_key in self.request.data:
             category_data = self.request.data[category_key]
 
-        category_instance = get_object_or_404(Category, user=self.request.user, name=category_data)
-        return HanziStudyRecord.objects.filter(user=self.request.user, category=category_instance)
+        self.category_instance = get_object_or_404(Category, user=self.request.user, name=category_data)
+        return HanziStudyRecord.objects.filter(user=self.request.user, category=self.category_instance)
 
     def perform_create(self, serializer):
         hanzi_data = self.request.data['hanzi']
@@ -109,7 +123,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         NUM_RETIRED = 10
         num_retired_key = 'num_retired'
         num_retired = int(request.query_params[num_retired_key]) if num_retired_key in request.query_params else NUM_RETIRED
-        study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user)
+        study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user, category=self.category_instance)
         deck_ids = leitner.decks_to_review(study_count.count)
 
         ret = []
@@ -144,7 +158,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         new_hanzi_key = 'new_hanzi'
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
-        study_count = HanziStudyCount.objects.get(user=request.user)
+        study_count = HanziStudyCount.objects.get(user=request.user, category=self.category_instance)
 
         grasped_hanzi = jsonpickle.decode(grasped_hanzi)
         new_hanzi = jsonpickle.decode(new_hanzi)
