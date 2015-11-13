@@ -15,11 +15,12 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
-    user = serializers.HyperlinkedIdentityField(view_name='user-detail')
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    category = serializers.SlugRelatedField(slug_field='name', read_only=True)
 
     class Meta:
         model = HanziStudyCount
-        fileds = ('user', 'count', 'timestamp')
+        fileds = ('user', 'category', 'count', 'timestamp')
 
 
 class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,10 +55,9 @@ class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    study_counts = serializers.SlugRelatedField(slug_field='count', read_only=True)
     study_records = serializers.HyperlinkedRelatedField(many=True, view_name='hanzistudyrecord-detail', read_only=True)
     categories = serializers.HyperlinkedRelatedField(many=True, view_name='category-detail', read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'study_counts', 'study_records', 'categories')
+        fields = ('id', 'username', 'study_records', 'categories')

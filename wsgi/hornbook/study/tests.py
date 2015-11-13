@@ -171,7 +171,7 @@ class HanziStudyCountViewSetTests(APITestCase):
         self.category = _create_one_Category_instance(self.user, 'category')
 
         another_user = _create_one_User_instance('another_user')
-        another_category = _create_one_Category_instance(self.user, 'another_category')
+        another_category = _create_one_Category_instance(another_user, 'another_category')
         _create_one_HanziStudyCount_instance(another_user, another_category, 10)
 
     def test_create_HanziStudyCount(self):
@@ -206,12 +206,11 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_get_one_HanziStudyCount(self):
         # arrange
         count = 3
-        _create_one_HanziStudyCount_instance(self.user, self.category, count)
+        study_count = _create_one_HanziStudyCount_instance(self.user, self.category, count)
 
         # act
-        url = reverse('hanzistudycount-detail', args=[self.user.id])
+        url = reverse('hanzistudycount-detail', args=[study_count.id])
         url += '?category={category}'.format(category=self.category.name)
-        print(url)
         response = self.client.get(url)
 
         # assert
@@ -221,12 +220,12 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_put_one_HanziStudyCount(self):
         # arrange
         count = 3
-        _create_one_HanziStudyCount_instance(self.user, self.category, count)
+        study_count = _create_one_HanziStudyCount_instance(self.user, self.category, count)
 
         # act
         count = 6
         data = {'count': count, 'category': self.category.name}
-        url = reverse('hanzistudycount-detail', args=[self.user.id])
+        url = reverse('hanzistudycount-detail', args=[study_count.id])
         response = self.client.put(url, data=data, format='json')
 
         # assert
@@ -237,10 +236,10 @@ class HanziStudyCountViewSetTests(APITestCase):
     def test_delete_one_HanziStudyCount(self):
         # arrange
         count = 3
-        _create_one_HanziStudyCount_instance(self.user, self.category, count)
+        study_count = _create_one_HanziStudyCount_instance(self.user, self.category, count)
 
         # act
-        url = reverse('hanzistudycount-detail', args=[self.user.id])
+        url = reverse('hanzistudycount-detail', args=[study_count.id])
         url += '?category={category}'.format(category=self.category.name)
         response = self.client.delete(url)
 
@@ -281,7 +280,6 @@ class UserViewSetTests(APITestCase):
         result_data = response.data['results']
         self.assertEqual(len(result_data), 1)
         self.assertEqual(result_data[0]['username'], self.user.username)
-        self.assertEqual(result_data[0]['study_counts'], count)
         self.assertEqual(len(result_data[0]['study_records']), 1)
         self.assertEqual(result_data[0]['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[2]))
 
@@ -298,8 +296,6 @@ class UserViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['username'], self.user.username)
-        self.assertEqual(response.data['study_counts'], count)
         self.assertEqual(len(response.data['study_records']), 1)
         self.assertEqual(response.data['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[2]))
 
@@ -342,8 +338,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 1)
         self.assertEqual(Hanzi.objects.filter(content=hanzi).count(), 1)
-        self.assertEqual(HanziStudyRecord.objects.get(user=self.user).hanzi, Hanzi.objects.get(content=hanzi))
-        self.assertEqual(HanziStudyRecord.objects.get(user=self.user).category, Category.objects.get(user=self.user, name=self.category))
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, category=self.category).hanzi, Hanzi.objects.get(content=hanzi))
 
     def test_get_one_HanziStudyRecord(self):
         # arrange

@@ -33,7 +33,7 @@ class Category(models.Model):
         super(Category, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return self.name
+        return self.unique_name
 
 
 class StudyRecord(models.Model):
@@ -70,8 +70,7 @@ class HanziStudyRecord(CategorisedLeitnerStudyRecord):
 
 
 class HanziStudyCount(models.Model):
-    id = models.IntegerField()
-    user = models.OneToOneField(User, editable=False, db_index=True, related_name='study_counts', primary_key=True)
+    user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_counts')
     count = models.PositiveSmallIntegerField(default=0)
     category = models.ForeignKey(Category, editable=False, db_index=True)
     timestamp = models.DateTimeField(auto_now=True)
