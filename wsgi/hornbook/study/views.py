@@ -161,7 +161,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         new_hanzi_key = 'new_hanzi'
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
-        study_count = HanziStudyCount.objects.get(user=request.user, category=self.category_instance)
+        study_count = get_object_or_404(HanziStudyCount, user=request.user, category=self.category_instance)
 
         grasped_hanzi = jsonpickle.decode(grasped_hanzi)
         new_hanzi = jsonpickle.decode(new_hanzi)
@@ -169,7 +169,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         for hanzi in grasped_hanzi:
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
-                study_record = all_records.get(hanzi=hanzi_instance)
+                study_record = all_records.get(hanzi=hanzi_instance, category=self.category_instance)
                 # move from Deck Current to Session Deck
                 if study_record.leitner_deck == 'C':
                     study_record.leitner_deck = str(study_count.count % 10)
@@ -180,7 +180,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
         for hanzi in new_hanzi:
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
-            if not is_new_hanzi:
+            if not is_new_hanzi and all_records.filter(hanzi=hanzi_instance).count() > 0:
                 study_record = all_records.get(hanzi=hanzi_instance)
                 # move to Deck Current
                 study_record.leitner_deck = 'C'

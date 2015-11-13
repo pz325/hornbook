@@ -111,6 +111,7 @@ var NewContentComponent = React.createClass({
         oldState.rawNewContents = event.target.value;
         oldState.newContents = this.refs.newContents.getValue().match(/\S+/g);
         this.setState(oldState);
+        console.log(this.state.newContents);
     },
     handleAddButtonClick() {
         if (this.state.newContents.length > 0) {
@@ -140,8 +141,10 @@ var NewContentComponent = React.createClass({
         this.reset();
     },
     saveNewContentToServer(){
-        this.closeWithoutSavingToServer();
+        this.close();
+        console.log(this.state.newContents, this.props.category);
         StudyAPI.updateLeitnerRecord([], this.state.newContents, this.props.category);
+        this.props.recap(this.state.newContents);
         this.reset();
     },
     render: function() {
