@@ -107,7 +107,10 @@ if ON_OPENSHIFT:
             'USER': os.environ['OPENSHIFT_MYSQL_DB_USERNAME'],
             'PASSWORD': os.environ['OPENSHIFT_MYSQL_DB_PASSWORD'],
             'HOST': os.environ['OPENSHIFT_MYSQL_DB_HOST'],
-            'PORT': os.environ['OPENSHIFT_MYSQL_DB_PORT']
+            'PORT': os.environ['OPENSHIFT_MYSQL_DB_PORT'],
+            'OPTIONS': {
+                "init_command": "SET foreign_key_checks = 0;",
+            },
         }
     }
 
