@@ -21,9 +21,6 @@ import leitner
 import random
 import jsonpickle
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
