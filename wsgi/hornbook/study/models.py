@@ -106,7 +106,7 @@ import codecs
 
 def setupHornbookForUser(username):
     # add user xinrong
-    user = User.objects.create(username=username)
+    user = User.objects.get(username=username)
     # add category
     read_hanzi = Category.objects.create(user=user, name='read_hanzi')
     write_hanzi = Category.objects.create(user=user, name='write_hanzi')
@@ -114,7 +114,7 @@ def setupHornbookForUser(username):
     # add count
     read_hanzi_count = HanziStudyCount.objects.create(user=user, category=read_hanzi, count=1)
     write_hanzi_count = HanziStudyCount.objects.create(user=user, category=write_hanzi, count=1)
-    chinese_poem_count = HanziStudyCount.objects.create(User=user, category=chinese_poem, count=1)
+    chinese_poem_count = HanziStudyCount.objects.create(user=user, category=chinese_poem, count=1)
 
 
 def importGAEData():
