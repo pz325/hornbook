@@ -135,9 +135,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         index = range(0, len(retired_deck))
         random.shuffle(index)
         picked_retired = [retired_deck[i] for i in index[:num_retired]]
-        for r in picked_retired:
-            r.repeat_count += 1
-            r.save()
+        # for r in picked_retired:
+        #     r.repeat_count += 1
+        #     r.save()
         ret = ret + [h for h in picked_retired]
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
@@ -167,11 +167,13 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
                 study_record = all_records.get(hanzi=hanzi_instance, category=self.category_instance)
+                if study_record.leitner_deck == 'R':
+                    study_record.repeat_count += 1
                 # move from Deck Current to Session Deck
-                if study_record.leitner_deck == 'C':
+                elif study_record.leitner_deck == 'C':
                     study_record.leitner_deck = str(study_count.count % 10)
                 # move from Session Deck to Deck Retired
-                if leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
+                elif leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
                     study_record.leitner_deck = 'R'
                 study_record.save()
 

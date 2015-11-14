@@ -109,7 +109,7 @@ if ON_OPENSHIFT:
             'HOST': os.environ['OPENSHIFT_MYSQL_DB_HOST'],
             'PORT': os.environ['OPENSHIFT_MYSQL_DB_PORT'],
             'OPTIONS': {
-                "init_command": "SET foreign_key_checks = 0;",
+                "init_command": "SET foreign_key_checks = 0;",    # bypass "Cannot add or update a child row: a foreign key constraint fails" error while working with MySQL
             },
         }
     }

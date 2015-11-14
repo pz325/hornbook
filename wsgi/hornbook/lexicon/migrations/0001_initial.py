@@ -13,8 +13,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Hanzi',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('content', models.CharField(max_length=6)),
+                ('content', models.CharField(max_length=100, serialize=False, primary_key=True)),
             ],
         ),
     ]
