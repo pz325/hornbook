@@ -137,6 +137,7 @@ var NewContentComponent = React.createClass({
     },
     closeWithoutSavingToServer() {
         this.close();
+        console.log(this.state.newContents, this.props.category);
         this.props.recap(this.state.newContents);
         this.reset();
     },
@@ -197,8 +198,8 @@ var StudyComponent = React.createClass({
         };
     },
     componentDidMount: function() {
-        var oldState = this.state;
-        this.setState(oldState);
+        // var oldState = this.state;
+        // this.setState(oldState);
     },
     addToKnowns: function() {
         this.updateProgress(true);
@@ -247,13 +248,15 @@ var StudyComponent = React.createClass({
         }
     },
     render: function() {
+        console.log(this.props.hanzis);
+        console.log(this.state);
         var unknownBadges = this.state.unknowns.map(function(unknown){
             return (<ReactBootstrap.Badge>{unknown}</ReactBootstrap.Badge>)
         });
         var hanzi = '';
         if (this.props.hanzis) {
             hanzi = this.props.hanzis[this.state.hanziIndex];
-        } 
+        }
         return (
             <div>
                 <ReactBootstrap.ProgressBar max={this.props.hanzis.length} now={this.state.hanziIndex+1} bsStyle="success" label="%(now)s of %(max)s" />
@@ -284,7 +287,7 @@ var HornbookComponent = React.createClass({
     },
     recap: function(newHanzis) {
         var oldState = this.state;
-        oldState.hanzis = newHanzis;
+        oldState.hanzis = shuffle(newHanzis);
         oldState.recapMode = true;
         this.setState(oldState);
     },
@@ -297,7 +300,7 @@ var HornbookComponent = React.createClass({
                     return studyRecord['hanzi']
                 });
             component.setState({
-                'hanzis': hanzis,
+                'hanzis': shuffle(hanzis),
                 'stats': progressResp[0]
             });
         });
