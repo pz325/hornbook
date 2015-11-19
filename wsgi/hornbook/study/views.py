@@ -167,10 +167,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
                 study_record = all_records.get(hanzi=hanzi_instance, category=self.category_instance)
-                if study_record.leitner_deck == 'R':
-                    study_record.repeat_count += 1
+                study_record.repeat_count += 1
                 # move from Deck Current to Session Deck
-                elif study_record.leitner_deck == 'C':
+                if study_record.leitner_deck == 'C':
                     study_record.leitner_deck = str(study_count.count % 10)
                 # move from Session Deck to Deck Retired
                 elif leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
@@ -184,6 +183,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                 # move to Deck Current
                 study_record.leitner_deck = 'C'
                 study_record.forget_count += 1
+                study_record.repeat_count += 1
                 study_record.save()
             else:
                 category_instance = get_object_or_404(Category, user=request.user, name=request.data['category'])
