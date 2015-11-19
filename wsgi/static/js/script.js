@@ -74,7 +74,13 @@ var StudyAPI = (function() {
             //data: data,
             dataType: "json",
             success: function(resp) {
-                console.log(resp); }
+                console.log(resp);
+                $.notify("Updated", "success");
+            },
+            error: function(resp) {
+                console.log(resp);
+                $.notify("Updating study history failed", "warn");
+            }
             });
     };
 
