@@ -426,17 +426,20 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
     def test_set_leitner_record(self):
         # arrange
+        retired_hanzis = [u'北', u'春', u'夏', u'冬']
         _create_one_leitner_record(self.user, self.category.name, u'东', 'C')
         _create_one_leitner_record(self.user, self.category.name, u'南', '1')
         _create_one_leitner_record(self.user, self.category.name, u'西', '2')
+        for h in retired_hanzis:
+            _create_one_leitner_record(self.user, self.category.name, h, 'R')
         _create_one_HanziStudyCount_instance(self.user, self.category, 1)
 
         # act
         url = reverse('hanzistudyrecord-list') + '/leitner_record'
         data = {
             'category': self.category.name,
-            'grasped_hanzi': json.dumps([u'东', u'西']),   # 东 -> deck 1, 西 -> deck R
-            'new_hanzi': json.dumps([u'北', u'南'])        # 南 -> deck C, new Hanzi, 北 -> deck C
+            'grasped_hanzi': json.dumps([u'东', u'西', u'冬']),   # 东 -> deck 1, 西 -> deck R, 冬 -> deck R
+            'new_hanzi': json.dumps([u'李', u'南'])        # 南 -> deck C, new Hanzi, 李 -> deck C
         }
 
         response = self.client.post(url, data)
@@ -444,13 +447,15 @@ class HanziStudyRecordViewSetTests(APITestCase):
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, 2)
-        self.assertEqual(Hanzi.objects.all().count(), 5)  # including 王 added during Setup
+        self.assertEqual(Hanzi.objects.all().count(), 9)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, '1')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'西')).leitner_deck, 'R')
-        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'李')).leitner_deck, 'C')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).leitner_deck, 'C')
+        for h in retired_hanzis:
+            self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=h)).leitner_deck, 'R')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).forget_count, 1)
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).repeat_count, 1)
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'西')).repeat_count, 1)
-        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).repeat_count, 0)  # 北 is new
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'李')).repeat_count, 0)  # 北 is new
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).repeat_count, 1)

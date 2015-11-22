@@ -172,7 +172,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                 if study_record.leitner_deck == 'C':
                     study_record.leitner_deck = str(study_count.count % 10)
                 # move from Session Deck to Deck Retired
-                elif leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
+                elif study_record.leitner_deck != 'R' and leitner.is_last_number_on_deck(study_record.leitner_deck, study_count.count):
                     study_record.leitner_deck = 'R'
                 study_record.save()
 
