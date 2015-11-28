@@ -112,65 +112,94 @@ var StatLabels = React.createClass({
 });
 
 
+var ModelQuery = React.createClass({
+    propTypes: {
+        show: React.PropTypes.bool.isRequired,
+        header: React.PropTypes.string.isRequired,
+        contents: React.PropTypes.string.isRequired,
+        no: React.PropTypes.func.isRequired,
+        yes: React.PropTypes.func.isRequired
+    },
+    render: function() {
+        return (
+            <div>
+                <ReactBootstrap.Modal show={this.props.show} onHide={this.props.no}>
+                    <ReactBootstrap.Modal.Header closeButton>
+                        <ReactBootstrap.Modal.Title>{this.props.header}</ReactBootstrap.Modal.Title>
+                    </ReactBootstrap.Modal.Header>
+                    <ReactBootstrap.Modal.Body>
+                        {this.props.contents}
+                    </ReactBootstrap.Modal.Body>
+                    <ReactBootstrap.Modal.Footer>
+                        <ReactBootstrap.ButtonToolbar>
+                            <ReactBootstrap.Button bsStyle="info" onClick={this.props.yes}>Save</ReactBootstrap.Button>
+                            <ReactBootstrap.Button onClick={this.props.no}>No</ReactBootstrap.Button>
+                        </ReactBootstrap.ButtonToolbar>
+                    </ReactBootstrap.Modal.Footer>
+                </ReactBootstrap.Modal>
+            </div>
+        );
+    }
+});
+
 /** 
  * A form to add new contents
  * Also display stats
  */
 var NewContentForm = React.createClass({
-    
-    getInitialState() {
+    propTypes: {
+        stats: React.PropTypes.shape({
+            new: React.PropTypes.number,
+            studying: React.PropTypes.number,
+            grasped: React.PropTypes.number
+        }).isRequired,
+        newContents: React.PropTypes.array.isRequired,
+        updateNewContents: React.PropTypes.func.isRequired,
+        showSaveQuery: React.PropTypes.func.isRequired,
+        showSaveQueryModel: React.PropTypes.bool.isRequired,
+        addNewContents: React.PropTypes.func.isRequired
+    },
+
+    getInitialState: function() {
         return {
-            'rawNewContents': "",
-            'showModal': false,
-            'newContents': []
+            'rawNewContents': "",  // used for the controlled input
         };
     },
-    handleNewContentsInputChange(event) {
-        var oldState = this.state;
-        oldState.rawNewContents = event.target.value;
-        oldState.newContents = this.refs.newContents.getValue().match(/\S+/g);
-        this.setState(oldState);
-        console.log(this.state.newContents);
+
+    handleNewContentsInputChange: function(event) {
+        this.setState({
+            'rawNewContents': event.target.value
+        });
+        this.props.updateNewContents(event.target.value);
     },
-    handleAddButtonClick() {
-        if (this.state.newContents.length > 0) {
-            this.show();
+
+    handleAddButtonClick: function() {
+        if (this.props.newContents.length > 0) {
+            this.props.showSaveQuery(true);
         }
     },
-    show() {
-        var oldState = this.state;
-        oldState.showModal = true;
-        this.setState(oldState);
+
+    reset: function() {
+        this.setState({
+            'rawNewContents': "",
+        });
     },
-    close() {
-        var oldState = this.state;
-        oldState.showModal = false;
-        this.setState(oldState);
-    },
-    reset() {
-        var oldState = this.state;
-        oldState.rawNewContents = "";
-        oldState.newContents = [];
-        oldState.showModal = false;
-        this.setState(oldState);
-    },
-    closeWithoutSavingToServer() {
-        this.close();
-        console.log(this.state.newContents, this.props.category);
-        this.props.recap(this.state.newContents);
+
+    closeWithoutSavingToServer: function() {
+        this.props.showSaveQuery(false);
+        this.props.addNewContents(false);
         this.reset();
     },
-    saveNewContentToServer(){
-        this.close();
-        console.log(this.state.newContents, this.props.category);
-        StudyAPI.updateLeitnerRecord([], this.state.newContents, this.props.category);
-        this.props.recap(this.state.newContents);
+    saveNewContentToServer: function(){
+        this.props.showSaveQuery(false);
+        this.props.addNewContents(true);
         this.reset();
     },
+
     render: function() {
         const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         const stats = <StatLabels stats={this.props.stats} />;
-        const newContents = this.state.newContents ? this.state.newContents.join() : "";
+        const newContentsStr = this.props.newContents ? this.props.newContents.join() : "";
 
         return (
             <div>
@@ -182,26 +211,16 @@ var NewContentForm = React.createClass({
                         placeholder="new content. space to separate" 
                         ref="newContents" 
                         onChange={this.handleNewContentsInputChange}
-                        addonBefore={stats}
+                        addonBefore={stats}    // add stat labels before NewContent input
                         buttonAfter={addButton}
-                        help={"new contents: " + newContents}/>                
+                        help={"new contents: " + newContentsStr}/>                
                 </div>
-                <ReactBootstrap.Modal show={this.state.showModal} onHide={this.closeWithoutSavingToServer}>
-                    <ReactBootstrap.Modal.Header closeButton>
-                        <ReactBootstrap.Modal.Title>Save the following new contents to server</ReactBootstrap.Modal.Title>
-                    </ReactBootstrap.Modal.Header>
-                    <ReactBootstrap.Modal.Body>
-                        <div>
-                            {newContents}
-                        </div>
-                    </ReactBootstrap.Modal.Body>
-                    <ReactBootstrap.Modal.Footer>
-                        <ReactBootstrap.ButtonToolbar>
-                            <ReactBootstrap.Button bsStyle="info" onClick={this.saveNewContentToServer}>Save</ReactBootstrap.Button>
-                            <ReactBootstrap.Button onClick={this.closeWithoutSavingToServer}>No</ReactBootstrap.Button>
-                        </ReactBootstrap.ButtonToolbar>
-                    </ReactBootstrap.Modal.Footer>
-                </ReactBootstrap.Modal>
+                <ModelQuery
+                    show={this.props.showSaveQueryModel}
+                    header="Save the following new contents to server"
+                    contents={newContentsStr}
+                    yes={this.saveNewContentToServer}
+                    no={this.closeWithoutSavingToServer} />
             </div>
         );
     }
@@ -256,7 +275,9 @@ var StudyPage = React.createClass({
             'unknowns': [],
             'knowns': [],
             'stats': {},
-            'recapMode': false
+            'recapMode': false,
+            'newContents': [],
+            'showSaveQueryModel': false
         };
     },
     
@@ -312,7 +333,8 @@ var StudyPage = React.createClass({
             'recapMode': true,
             'hanziIndex': 0,
             'knowns': [],
-            'unknowns': []
+            'unknowns': [],
+            'newContents': []
         });
         this.refreshStat();
     },
@@ -350,13 +372,38 @@ var StudyPage = React.createClass({
         }
     },
 
+    updateNewContents: function(rawNewContents) {
+        this.setState({
+            'newContents': rawNewContents.match(/\S+/g)
+        })
+    },
+
+    showSaveQuery: function(show) {
+        this.setState({
+            'showSaveQueryModel': show
+        })
+    },
+
+    addNewContents: function(save) {
+        if (save) {
+            StudyAPI.updateLeitnerRecord([], this.state.newContents, CATEGORY);
+        }
+        this.recap(this.state.newContents);
+    },
+
     render: function() {
         const progressMax = this.state.hanzis.length;
         const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
 
         return (
             <div>
-                <NewContentForm stats={this.state.stats} recap={this.recap} category={CATEGORY} />
+                <NewContentForm 
+                    stats={this.state.stats} 
+                    newContents={this.state.newContents} 
+                    updateNewContents={this.updateNewContents}
+                    showSaveQuery={this.showSaveQuery} 
+                    showSaveQueryModel={this.state.showSaveQueryModel}
+                    addNewContents={this.addNewContents} />
                 <ReactBootstrap.ProgressBar max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
                 <StudyComponent 
                     hanzis={this.state.hanzis} 
