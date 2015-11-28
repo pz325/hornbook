@@ -248,17 +248,19 @@ var StudyComponent = React.createClass({
     propTypes: {
         hanzis: React.PropTypes.array.isRequired,
         hanziIndex: React.PropTypes.number.isRequired,
-        addToKnowns: React.PropTypes.func.isRequired
+        addToKnowns: React.PropTypes.func.isRequired,
+        hanziClass: React.PropTypes.string
     },
     render: function() {
         var hanzi = '';
         if (this.props.hanzis) {
             hanzi = this.props.hanzis[this.props.hanziIndex];
         }
-        
+        var hanziClass = this.props.hanziClass ? this.props.hanziClass : "han_character";
+
         return (
             <div>
-                <span className="han_character" onClick={this.props.addToKnowns}>{hanzi}</span>
+                <span className={hanziClass} onClick={this.props.addToKnowns}>{hanzi}</span>
             </div>
         );
     }
@@ -394,7 +396,8 @@ var StudyPage = React.createClass({
     render: function() {
         const progressMax = this.state.hanzis.length;
         const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
-
+        const hanziClass = CATEGORY === "chinese_poem" ? "han_character_small" : "han_character";
+        
         return (
             <div>
                 <NewContentForm 
@@ -408,7 +411,8 @@ var StudyPage = React.createClass({
                 <StudyComponent 
                     hanzis={this.state.hanzis} 
                     hanziIndex={this.state.hanziIndex} 
-                    addToKnowns={this.addToKnowns} />
+                    addToKnowns={this.addToKnowns}
+                    hanziClass={hanziClass} />
                 {this.getAddToRecapButton()}
                 <Unknowns unknowns={this.state.unknowns} />
                 <hr />
