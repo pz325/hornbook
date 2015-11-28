@@ -104,7 +104,13 @@ var StatLabels = React.createClass({
     }
 });
 
+
+/** 
+ * A form to add new contents
+ * Also display stats
+ */
 var NewContentForm = React.createClass({
+    
     getInitialState() {
         return {
             'rawNewContents': "",
@@ -299,9 +305,14 @@ var StudyPage = React.createClass({
         };
     },
     recap: function(newHanzis) {
-        this.setState({
-            'hanzis': shuffle(newHanzis),
-            'recapMode': true
+        var component = this;
+        $.when(StudyAPI.getProgress(CATEGORY))
+        .done(function(progressResp) {
+            component.setState({
+                'hanzis': shuffle(newHanzis),
+                'recapMode': true,
+                'stats': progressResp
+            });
         });
     },
     componentDidMount: function() {
