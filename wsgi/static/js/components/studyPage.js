@@ -278,9 +278,11 @@ var StudyComponent = React.createClass({
         if (this.props.hanzis) {
             hanzi = this.props.hanzis[this.state.hanziIndex];
         }
+        const progressMax = this.props.hanzis.length;
+        const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
         return (
             <div>
-                <ReactBootstrap.ProgressBar max={this.props.hanzis.length} now={this.state.hanziIndex+1} bsStyle="success" label="%(now)s of %(max)s" />
+                <ReactBootstrap.ProgressBar max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
                 <div>
                     <span className="han_character" onClick={this.addToKnowns}>{hanzi}</span>
                 </div>
