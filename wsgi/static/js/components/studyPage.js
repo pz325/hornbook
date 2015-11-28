@@ -92,7 +92,7 @@ var StudyAPI = (function() {
 })();
 
 
-var StatComponent = React.createClass({
+var StatLabels = React.createClass({
     render: function() {
         return (
             <div>
@@ -104,7 +104,7 @@ var StatComponent = React.createClass({
     }
 });
 
-var NewContentComponent = React.createClass({
+var NewContentForm = React.createClass({
     getInitialState() {
         return {
             'rawNewContents': "",
@@ -156,7 +156,7 @@ var NewContentComponent = React.createClass({
     },
     render: function() {
         const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
-        const stats = <StatComponent stats={this.props.stats} />;
+        const stats = <StatLabels stats={this.props.stats} />;
         const newContents = this.state.newContents ? this.state.newContents.join() : "";
 
         return (
@@ -193,6 +193,20 @@ var NewContentComponent = React.createClass({
         );
     }
 });
+
+var Unknowns = React.createClass({
+    render: function() {
+        var unknowns = this.props.unknowns.map(function(unknown) {
+            return (<ReactBootstrap.Badge>{unknown}</ReactBootstrap.Badge>)
+        });
+        return (
+            <div>
+                {unknowns}
+            </div>
+        )
+    }
+});
+
 
 var StudyComponent = React.createClass({
     // main study component  
@@ -254,11 +268,6 @@ var StudyComponent = React.createClass({
         }
     },
     render: function() {
-        console.log(this.props.hanzis);
-        console.log(this.state);
-        var unknownBadges = this.state.unknowns.map(function(unknown){
-            return (<ReactBootstrap.Badge>{unknown}</ReactBootstrap.Badge>)
-        });
         var hanzi = '';
         if (this.props.hanzis) {
             hanzi = this.props.hanzis[this.state.hanziIndex];
@@ -270,9 +279,7 @@ var StudyComponent = React.createClass({
                     <span className="han_character" onClick={this.addToKnowns}>{hanzi}</span>
                 </div>
                     {this.getAddToRecapButton()}
-                <div>
-                    {unknownBadges}
-                </div>
+                <Unknowns unknowns={this.state.unknowns} />
                 <hr/>
                 {this.state.count}
             </div>
@@ -281,9 +288,9 @@ var StudyComponent = React.createClass({
 });
 
 
-var CATEGORY = $("#content").attr("category");
+var CATEGORY = $("#app").attr("category");
 
-var HornbookComponent = React.createClass({
+var StudyPage = React.createClass({
     getInitialState: function() {
         return {
             'hanzis': [],
@@ -292,10 +299,10 @@ var HornbookComponent = React.createClass({
         };
     },
     recap: function(newHanzis) {
-        var oldState = this.state;
-        oldState.hanzis = shuffle(newHanzis);
-        oldState.recapMode = true;
-        this.setState(oldState);
+        this.setState({
+            'hanzis': shuffle(newHanzis),
+            'recapMode': true
+        });
     },
     componentDidMount: function() {
         var component = this;
@@ -315,7 +322,7 @@ var HornbookComponent = React.createClass({
         console.log(this.props);
         return (
             <div>
-                <NewContentComponent stats={this.state.stats} recap={this.recap} category={CATEGORY} />
+                <NewContentForm stats={this.state.stats} recap={this.recap} category={CATEGORY} />
                 <StudyComponent hanzis={this.state.hanzis} recap={this.recap} recapMode={this.state.recapMode} category={CATEGORY} />
             </div>
         );
@@ -324,6 +331,6 @@ var HornbookComponent = React.createClass({
 
 
 ReactDOM.render(
-    <HornbookComponent />,
-    document.getElementById('content')
+    <StudyPage />,
+    document.getElementById('app')
 );
