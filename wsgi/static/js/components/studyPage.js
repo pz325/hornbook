@@ -215,81 +215,15 @@ var Unknowns = React.createClass({
 
 
 var StudyComponent = React.createClass({
-    // main study component  
-    getInitialState: function() {
-        return {
-            'hanziIndex': 0,
-            'unknowns': [],
-            'knowns': []
-        };
-    },
-    componentDidMount: function() {
-        // var oldState = this.state;
-        // this.setState(oldState);
-    },
-    addToKnowns: function() {
-        this.updateProgress(true);
-    },
-    addToUnknowns: function() {
-        this.updateProgress(false);
-    },
-    updateProgress: function(addToKnowns) {
-        var oldState = this.state;
-        if (addToKnowns) {
-            oldState.knowns.push(this.props.hanzis[oldState.hanziIndex]);            
-        } else {
-            oldState.unknowns.push(this.props.hanzis[oldState.hanziIndex]);            
-        }
-        
-        oldState.hanziIndex += 1;
-        if (oldState.hanziIndex < this.props.hanzis.length) {
-            this.setState(oldState);
-        } else {
-            if (!this.props.recapMode) {
-                this.commitResult();
-            }
-            var hanzisToRecap = this.props.recapMode ? 
-                shuffle(this.props.hanzis):
-                shuffle(this.state.unknowns);
-            oldState.hanziIndex = 0;
-            oldState.unknowns = [];
-            // recap
-            this.props.recap(hanzisToRecap);
-        }
-    },
-    commitResult: function() {
-        // commit to server
-        var result = {
-            "grasped_hanzi": this.state.knowns,
-            "new_hanzi": this.state.unknowns
-        };
-        console.log(result);
-        StudyAPI.updateLeitnerRecord(this.state.knowns, this.state.unknowns, this.props.category);
-    },
-    getAddToRecapButton: function() {
-        if (!this.props.recapMode) {
-            return (<ReactBootstrap.Button bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>);
-        } else {
-            return 'Recap mode';
-        }
-    },
     render: function() {
         var hanzi = '';
         if (this.props.hanzis) {
-            hanzi = this.props.hanzis[this.state.hanziIndex];
+            hanzi = this.props.hanzis[this.props.hanziIndex];
         }
-        const progressMax = this.props.hanzis.length;
-        const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
+        
         return (
             <div>
-                <ReactBootstrap.ProgressBar max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
-                <div>
-                    <span className="han_character" onClick={this.addToKnowns}>{hanzi}</span>
-                </div>
-                    {this.getAddToRecapButton()}
-                <Unknowns unknowns={this.state.unknowns} />
-                <hr/>
-                {this.state.count}
+                <span className="han_character" onClick={this.props.addToKnowns}>{hanzi}</span>
             </div>
         );
     }
@@ -302,21 +236,81 @@ var StudyPage = React.createClass({
     getInitialState: function() {
         return {
             'hanzis': [],
+            'hanziIndex': 0,
+            'unknowns': [],
+            'knowns': [],
             'stats': {},
             'recapMode': false
         };
     },
+    
+    addToKnowns: function() {
+        this.updateProgress(true);
+    },
+    
+    addToUnknowns: function() {
+        this.updateProgress(false);
+    },
+    
+    updateProgress: function(addToKnowns) {
+        var oldState = this.state;
+        if (addToKnowns) {
+            oldState.knowns.push(this.state.hanzis[oldState.hanziIndex]);            
+        } else {
+            oldState.unknowns.push(this.state.hanzis[oldState.hanziIndex]);            
+        }
+        
+        oldState.hanziIndex += 1;
+        if (oldState.hanziIndex < this.state.hanzis.length) {
+            this.setState(oldState);
+        } else {
+            if (!this.state.recapMode) {
+                this.commitResult();
+            }
+            var hanzisToRecap = this.state.recapMode ? 
+                shuffle(this.state.hanzis):
+                shuffle(this.state.unknowns);
+            oldState.hanziIndex = 0;
+            oldState.unknowns = [];
+            // recap
+            this.recap(hanzisToRecap);
+        }
+    },
+
+    commitResult: function() {
+        var component = this;
+        // commit to server
+        var result = {
+            "grasped_hanzi": this.state.knowns,
+            "new_hanzi": this.state.unknowns
+        };
+        $.when(StudyAPI.updateLeitnerRecord(this.state.knowns, this.state.unknowns, CATEGORY))
+        .done(function() {
+            component.refreshStat();
+        });
+    },
+
     recap: function(newHanzis) {
+        this.setState({
+            'hanzis': shuffle(newHanzis),
+            'recapMode': true,
+            'hanziIndex': 0,
+            'knowns': [],
+            'unknowns': []
+        });
+        this.refreshStat();
+    },
+
+    refreshStat: function() {
         var component = this;
         $.when(StudyAPI.getProgress(CATEGORY))
         .done(function(progressResp) {
             component.setState({
-                'hanzis': shuffle(newHanzis),
-                'recapMode': true,
-                'stats': progressResp
+                'stats': progressResp,
             });
         });
     },
+
     componentDidMount: function() {
         var component = this;
         $.when(StudyAPI.getLeitnerRecord(CATEGORY), StudyAPI.getProgress(CATEGORY))
@@ -331,12 +325,30 @@ var StudyPage = React.createClass({
             });
         });
     },
+    
+    getAddToRecapButton: function() {
+        if (!this.state.recapMode) {
+            return (<ReactBootstrap.Button bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>);
+        } else {
+            return 'Recap mode';
+        }
+    },
+
     render: function() {
-        console.log(this.props);
+        const progressMax = this.state.hanzis.length;
+        const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
+
         return (
             <div>
                 <NewContentForm stats={this.state.stats} recap={this.recap} category={CATEGORY} />
-                <StudyComponent hanzis={this.state.hanzis} recap={this.recap} recapMode={this.state.recapMode} category={CATEGORY} />
+                <ReactBootstrap.ProgressBar max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
+                <StudyComponent 
+                    hanzis={this.state.hanzis} 
+                    hanziIndex={this.state.hanziIndex} 
+                    addToKnowns={this.addToKnowns} />
+                {this.getAddToRecapButton()}
+                <Unknowns unknowns={this.state.unknowns} />
+                <hr />
             </div>
         );
     }
