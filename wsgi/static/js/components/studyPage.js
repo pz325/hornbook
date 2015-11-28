@@ -93,6 +93,13 @@ var StudyAPI = (function() {
 
 
 var StatLabels = React.createClass({
+    propTypes: {
+        stats: React.PropTypes.shape({
+            new: React.PropTypes.number,
+            studying: React.PropTypes.number,
+            grasped: React.PropTypes.number
+        }).isRequired
+    },
     render: function() {
         return (
             <div>
@@ -201,6 +208,10 @@ var NewContentForm = React.createClass({
 });
 
 var Unknowns = React.createClass({
+    propTypes: {
+        unknowns: React.PropTypes.array.isRequired,
+    },
+
     render: function() {
         var unknowns = this.props.unknowns.map(function(unknown) {
             return (<ReactBootstrap.Badge>{unknown}</ReactBootstrap.Badge>)
@@ -215,6 +226,11 @@ var Unknowns = React.createClass({
 
 
 var StudyComponent = React.createClass({
+    propTypes: {
+        hanzis: React.PropTypes.array.isRequired,
+        hanziIndex: React.PropTypes.number.isRequired,
+        addToKnowns: React.PropTypes.func.isRequired
+    },
     render: function() {
         var hanzi = '';
         if (this.props.hanzis) {
