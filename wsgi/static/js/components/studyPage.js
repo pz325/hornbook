@@ -397,7 +397,7 @@ var StudyPage = React.createClass({
         const progressMax = this.state.hanzis.length;
         const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
         const hanziClass = CATEGORY === "chinese_poem" ? "han_character_small" : "han_character";
-        
+
         return (
             <div>
                 <NewContentForm 
