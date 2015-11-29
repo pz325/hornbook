@@ -1,96 +1,12 @@
-//+ Jonas Raoni Soares Silva
-//@ http://jsfromhell.com/array/shuffle [v1.0]
-var shuffle = function(o){ //v1.0
-    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-    return o;
-};
+var csrftoken = Util.getCookie('csrftoken');
 
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-var csrftoken = getCookie('csrftoken');
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
 $.ajaxSetup({
     beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+        if (!Util.csrfSafeMethod(settings.type) && !this.crossDomain) {
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         }
     }
 });
-
-var StudyAPI = (function() {
-    const API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
-    const API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
-    
-    var getLeitnerRecord = function(category) {
-        return $.ajax({
-            type: 'GET',
-            url: API_LEITNER_RECORD_URL,
-            data: {
-                category: category
-            }
-        });
-    };
-
-    var getProgress = function(category) {
-        return $.ajax({
-            type: 'GET',
-            url: API_PROGRESS_URL,
-            data: {
-                category: category
-            }
-        })
-    }
-
-    /*
-     * @param knowns an array
-     * @param unknowns an array
-     * @return $.ajax()
-     */
-    var updateLeitnerRecord = function(knowns, unknowns, category) {
-        return $.ajax({
-            type: "POST",
-            url: API_LEITNER_RECORD_URL,
-            data: {
-                category: category,
-                grasped_hanzi: JSON.stringify(knowns), 
-                new_hanzi: JSON.stringify(unknowns)
-            },
-            //data: data,
-            dataType: "json",
-            success: function(resp) {
-                console.log(resp);
-                $.notify("Updated", "success");
-            },
-            error: function(resp) {
-                console.log(resp);
-                $.notify("Updating study history failed", "warn");
-            }
-            });
-    };
-
-    return {
-        updateLeitnerRecord: updateLeitnerRecord,
-        getLeitnerRecord, getLeitnerRecord,
-        getProgress, getProgress
-    };
-})();
-
 
 var StatLabels = React.createClass({
     propTypes: {
@@ -307,8 +223,8 @@ var StudyPage = React.createClass({
                 this.commitResult();
             }
             var hanzisToRecap = this.state.recapMode ? 
-                shuffle(this.state.hanzis):
-                shuffle(this.state.unknowns);
+                Util.shuffle(this.state.hanzis):
+                Util.shuffle(this.state.unknowns);
             oldState.hanziIndex = 0;
             oldState.unknowns = [];
             // recap
@@ -331,7 +247,7 @@ var StudyPage = React.createClass({
 
     recap: function(newHanzis) {
         this.setState({
-            'hanzis': shuffle(newHanzis),
+            'hanzis': Util.shuffle(newHanzis),
             'recapMode': true,
             'hanziIndex': 0,
             'knowns': [],
@@ -360,7 +276,7 @@ var StudyPage = React.createClass({
                     return studyRecord['hanzi']
                 });
             component.setState({
-                'hanzis': shuffle(hanzis),
+                'hanzis': Util.shuffle(hanzis),
                 'stats': progressResp[0]
             });
         });
