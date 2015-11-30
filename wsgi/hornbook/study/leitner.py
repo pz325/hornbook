@@ -40,4 +40,4 @@ def to_review(deck_id, number):
 
 
 def is_last_number_on_deck(deck_id, number):
-    return number == DECK_NUMBERS[deck_id][-1]
+    return number % 10 == DECK_NUMBERS[deck_id][-1]
