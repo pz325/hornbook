@@ -1,1 +1,12 @@
-Start your django app here:
+install
+
+1. Install brew
+2.
+  brew install node
+  brew install libyaml
+  brew install mysql
+3.
+  export PATH=$PATH:/usr/local/mysql/bin
+4.  
+  sudo pip install -r requirements.txt
+
