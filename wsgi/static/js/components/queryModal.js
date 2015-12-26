@@ -6,8 +6,8 @@ var ReactBootstrap = require('react-bootstrap');
 var QueryModal = React.createClass({
     propTypes: {
         show: React.PropTypes.bool.isRequired,
-        header: React.PropTypes.string.isRequired,
-        contents: React.PropTypes.string.isRequired,
+        title: React.PropTypes.string.isRequired,
+        body: React.PropTypes.string.isRequired,
         no: React.PropTypes.func.isRequired,
         yes: React.PropTypes.func.isRequired
     },
@@ -16,10 +16,10 @@ var QueryModal = React.createClass({
             <div>
                 <ReactBootstrap.Modal ref="modalDialog" show={this.props.show} onHide={this.props.no}>
                     <ReactBootstrap.Modal.Header closeButton>
-                        <ReactBootstrap.Modal.Title ref="title">{this.props.header}</ReactBootstrap.Modal.Title>
+                        <ReactBootstrap.Modal.Title ref="title">{this.props.title}</ReactBootstrap.Modal.Title>
                     </ReactBootstrap.Modal.Header>
                     <ReactBootstrap.Modal.Body ref="body">
-                        {this.props.contents}
+                        {this.props.body}
                     </ReactBootstrap.Modal.Body>
                     <ReactBootstrap.Modal.Footer>
                         <ReactBootstrap.ButtonToolbar>

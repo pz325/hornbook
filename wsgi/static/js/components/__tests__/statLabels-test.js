@@ -41,7 +41,7 @@ describe('StatLabels', () => {
         );
 
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
-        expect(labelDOMs.length).toEqual(3);
+        expect(labelDOMs.length).toBe(3);
     });
 
     it('the first label is New', () => {
@@ -53,7 +53,7 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[0]);
         var newSpanNode = newLabelNode.firstChild;
-        expect(newSpanNode.textContent).toEqual('New: ');
+        expect(newSpanNode.textContent).toBe('New: ');
     });
     it('the second label is Studying', () => {
         // render StatLabels in the document
@@ -64,7 +64,7 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[1]);
         var newSpanNode = newLabelNode.firstChild;
-        expect(newSpanNode.textContent).toEqual('Studying: ');
+        expect(newSpanNode.textContent).toBe('Studying: ');
     });
     it('the last label is Grasped', () => {
         // render StatLabels in the document
@@ -75,7 +75,7 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[2]);
         var newSpanNode = newLabelNode.firstChild;
-        expect(newSpanNode.textContent).toEqual('Grasped: ');
+        expect(newSpanNode.textContent).toBe('Grasped: ');
     });
     it('the value of the New label is statNew', () => {
         // render StatLabels in the document
@@ -86,7 +86,7 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[0]);
         var newSpanNode = newLabelNode.lastChild;
-        expect(newSpanNode.textContent).toEqual(statNew.toString()); 
+        expect(newSpanNode.textContent).toBe(statNew.toString()); 
     });
     it('the value of the Studying label is statStudying', () => {
         // render StatLabels in the document
@@ -97,7 +97,7 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[1]);
         var newSpanNode = newLabelNode.lastChild;
-        expect(newSpanNode.textContent).toEqual(statStudying.toString()); 
+        expect(newSpanNode.textContent).toBe(statStudying.toString()); 
     });
     it('the value of the Grasped label is statGrasped', () => {
         // render StatLabels in the document
@@ -108,6 +108,6 @@ describe('StatLabels', () => {
         var labelDOMs = TestUtils.scryRenderedDOMComponentsWithClass(statLabels, 'label');
         var newLabelNode = ReactDOM.findDOMNode(labelDOMs[2]);
         var newSpanNode = newLabelNode.lastChild;
-        expect(newSpanNode.textContent).toEqual(statGrasped.toString()); 
+        expect(newSpanNode.textContent).toBe(statGrasped.toString()); 
     });
 });
