@@ -27,8 +27,6 @@ var StudyPage = React.createClass({
             'knowns': [],
             'stats': {},
             'recapMode': false,
-            'newContents': [],
-            'showSaveQueryModel': false
         };
     },
     
@@ -79,13 +77,14 @@ var StudyPage = React.createClass({
     },
 
     recap: function(newHanzis) {
+        console.log('recap:', newHanzis);
+
         this.setState({
             'hanzis': Util.shuffle(newHanzis),
             'recapMode': true,
             'hanziIndex': 0,
             'knowns': [],
             'unknowns': [],
-            'newContents': []
         });
         this.refreshStat();
     },
@@ -123,17 +122,11 @@ var StudyPage = React.createClass({
         }
     },
 
-    showSaveQuery: function(show) {
-        this.setState({
-            'showSaveQueryModel': show
-        })
-    },
-
-    addNewContents: function(save) {
+    addNewContents: function(newContentArray, save) {
         if (save) {
-            StudyAPI.updateLeitnerRecord([], this.state.newContents, this.props.category);
+            StudyAPI.updateLeitnerRecord([], newContentArray, this.props.category);
         }
-        this.recap(this.state.newContents);
+        this.recap(newContentArray);
     },
 
     render: function() {
@@ -151,16 +144,9 @@ var StudyPage = React.createClass({
 
         return (
             <div>
-                <NewContentForm 
-                    statLabels={statLabels} 
-                    showSaveQuery={this.showSaveQuery} 
-                    showSaveQueryModel={this.state.showSaveQueryModel}
-                    addNewContents={this.addNewContents} />
+                <NewContentForm statLabels={statLabels} addNewContents={this.addNewContents} />
                 <ReactBootstrap.ProgressBar max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
-                <ClickableSpan 
-                    content={hanzi} 
-                    clickHandler={this.addToKnowns}
-                    fontClass={hanziClass} />
+                <ClickableSpan content={hanzi} clickHandler={this.addToKnowns} fontClass={hanziClass} />
                 {this.getAddToRecapButton()}
                 <BadgeList contents={this.state.unknowns} />
                 <hr />

@@ -12,15 +12,14 @@ var QueryModal = require('./queryModal');
  */
 var NewContentForm = React.createClass({
     propTypes: {
-        statLabels: React.PropTypes.instanceOf(StatLabels).isRequired,
-        showSaveQuery: React.PropTypes.func.isRequired,
-        showSaveQueryModel: React.PropTypes.bool.isRequired,
-        addNewContents: React.PropTypes.func.isRequired
+        statLabels: React.PropTypes.instanceOf(StatLabels),
+        addNewContents: React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
             'rawNewContents': "",  // used for the controlled input
+            'showModal': false
         };
     },
 
@@ -32,35 +31,40 @@ var NewContentForm = React.createClass({
 
     handleAddButtonClick: function() {
         if (this.state.rawNewContents.length > 0) {
-            this.props.showSaveQuery(true);
+            this.setState({
+                'showModal': true
+            });
         }
     },
 
     reset: function() {
         this.setState({
             'rawNewContents': "",
+            'showModal': false
         });
     },
 
     closeWithoutSavingToServer: function() {
-        this.props.showSaveQuery(false);
-        this.props.addNewContents(false);
-        this.reset();
-    },
-    saveNewContentToServer: function(){
-        this.props.showSaveQuery(false);
-        this.props.addNewContents(true);
+        this.props.addNewContents(this.getNewContentsArray(this.state.rawNewContents), false);
         this.reset();
     },
 
-    render: function() {
-        var newContentArray = [];
-        var newContentsStr = "";
-        if (this.state.rawNewContents)
-        {
-            newContentArray = this.state.rawNewContents.match(/\S+/g);
-            newContentsStr = newContentArray.join();
+    saveNewContentToServer: function() {
+        this.props.addNewContents(this.getNewContentsArray(this.state.rawNewContents), true);
+        this.reset();
+    },
+
+    getNewContentsArray: function(rawNewContents) {
+        var newContentsArray = [];
+        if (rawNewContents) {
+            newContentsArray = this.state.rawNewContents.match(/\S+/g);
         }
+        return newContentsArray;
+    },
+
+    render: function() {
+        const newContentsArray = this.getNewContentsArray(this.state.rawNewContents);
+        const newContentsStr = newContentsArray.join();
 
         const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         
@@ -80,7 +84,7 @@ var NewContentForm = React.createClass({
                         help={"new contents: " + newContentsStr}/>                
                 </div>
                 <QueryModal
-                    show={this.props.showSaveQueryModel}
+                    show={this.state.showModal}
                     title="Save the following new contents to server"
                     body={newContentsStr}
                     yes={this.saveNewContentToServer}
