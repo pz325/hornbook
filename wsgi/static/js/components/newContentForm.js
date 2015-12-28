@@ -12,7 +12,7 @@ var QueryModal = require('./queryModal');
  */
 var NewContentForm = React.createClass({
     propTypes: {
-        statLabels: React.PropTypes.instanceOf(StatLabels),
+        statLabels: React.PropTypes.element,
         addNewContents: React.PropTypes.func
     },
 
@@ -29,7 +29,7 @@ var NewContentForm = React.createClass({
         });
     },
 
-    handleAddButtonClick: function() {
+    handleButtonAddClick: function() {
         if (this.state.rawNewContents.length > 0) {
             this.setState({
                 'showModal': true
@@ -66,7 +66,7 @@ var NewContentForm = React.createClass({
         const newContentsArray = this.getNewContentsArray(this.state.rawNewContents);
         const newContentsStr = newContentsArray.join();
 
-        const addButton = <ReactBootstrap.Button bsStyle="info" onClick={this.handleAddButtonClick}><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
+        const buttonAdd = <ReactBootstrap.Button bsStyle="info" onClick={this.handleButtonAddClick} ref='NewContentForm_buttonAdd'><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         
 
         return (
@@ -77,13 +77,14 @@ var NewContentForm = React.createClass({
                         type="text"
                         value={this.state.rawNewContents}
                         placeholder="new content. space to separate" 
-                        ref="newContents" 
+                        ref="NewContentForm_inputNewContent" 
                         onChange={this.handleNewContentsInputChange}
                         addonBefore={this.props.statLabels}    // add stat labels before NewContent input
-                        buttonAfter={addButton}
+                        buttonAfter={buttonAdd}
                         help={"new contents: " + newContentsStr}/>                
                 </div>
                 <QueryModal
+                    ref='NewContentForm_queryModal'
                     show={this.state.showModal}
                     title="Save the following new contents to server"
                     body={newContentsStr}
