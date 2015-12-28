@@ -32,10 +32,12 @@ var StudyPanel = React.createClass({
     },
     
     addToKnowns: function() {
+        console.log('StudyPanel::addToKnowns()');
         this.updateProgress(true);
     },
     
     addToUnknowns: function() {
+        console.log('StudyPanel::addToUnknowns()');
         this.updateProgress(false);
     },
     
@@ -51,7 +53,7 @@ var StudyPanel = React.createClass({
         if (oldState.hanziIndex < this.props.hanzis.length) {
             this.setState(oldState);
         } else {
-            this.props.sessonDoneHandler(this.state.knowns, this.state.unknowns);
+            this.props.sessionDoneHandler(this.state.knowns, this.state.unknowns);
         }
     },
     
