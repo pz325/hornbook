@@ -1,0 +1,91 @@
+"use strict";
+
+var React = require('react');
+var ReactBootstrap = require('react-bootstrap');
+
+var StatLabels = require('./statLabels');
+var BadgeList = require('./badgeList');
+var ClickableSpan = require('./clickableSpan');
+var NewContentForm = require('./newContentForm');
+
+
+var StudyPanel = React.createClass({
+    propTypes: {
+        hanzis: React.PropTypes.array.isRequired,
+        stats: React.PropTypes.shape({
+            new: React.PropTypes.number,
+            studying: React.PropTypes.number,
+            grasped: React.PropTypes.number
+        }).isRequired,
+        sessionDoneHandler: React.PropTypes.func.isRequired,
+        newContentAddedHandler: React.PropTypes.func.isRequired,
+        recapMode: React.PropTypes.bool,        // default false
+        fontClass: React.PropTypes.string
+    },
+
+    getInitialState: function() {
+        return {
+            'hanziIndex': 0,
+            'unknowns': [],
+            'knowns': [],
+        };
+    },
+    
+    addToKnowns: function() {
+        this.updateProgress(true);
+    },
+    
+    addToUnknowns: function() {
+        this.updateProgress(false);
+    },
+    
+    updateProgress: function(addToKnowns) {
+        var oldState = this.state;
+        if (addToKnowns) {
+            oldState.knowns.push(this.props.hanzis[oldState.hanziIndex]);            
+        } else {
+            oldState.unknowns.push(this.props.hanzis[oldState.hanziIndex]);            
+        }
+        
+        oldState.hanziIndex += 1;
+        if (oldState.hanziIndex < this.props.hanzis.length) {
+            this.setState(oldState);
+        } else {
+            this.props.sessonDoneHandler(this.state.knowns, this.state.unknowns);
+        }
+    },
+    
+    getAddToRecapButton: function() {
+        if (!this.props.recapMode) {
+            return (<ReactBootstrap.Button ref='StudyPanel_buttonAddToUnknown' bsStyle="info" onClick={this.addToUnknowns}>Add To Recap</ReactBootstrap.Button>);
+        } else {
+            return 'Recap mode';
+        }
+    },
+
+    addNewContents: function(newContentArray, save) {
+        this.props.newContentAddedHandler(newContentArray, save);
+    },
+
+    render: function() {
+        var statLabels = <StatLabels stats={this.props.stats} />;
+        
+        const progressMax = this.props.hanzis.length;
+        const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
+        const fontClass = this.props.fontClass ? this.props.fontClass : 'han_character';
+        const hanzi = this.props.hanzis ? this.props.hanzis[this.state.hanziIndex] : '';
+
+        return (
+            <div>
+                <NewContentForm ref='StudyPanel_newContentForm' statLabels={statLabels} addNewContents={this.addNewContents} />
+                <ReactBootstrap.ProgressBar ref='StudyPanel_progressBar' max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
+                <ClickableSpan ref='StudyPanel_clickableSpan' content={hanzi} clickHandler={this.addToKnowns} fontClass={fontClass} />
+                {this.getAddToRecapButton()}
+                <BadgeList ref='StudyPanel_badgeList' contents={this.state.unknowns} />
+                <hr />
+            </div>
+        );
+    }
+});
+
+module.exports = StudyPanel;

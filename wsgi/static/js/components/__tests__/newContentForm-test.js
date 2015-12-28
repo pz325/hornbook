@@ -25,7 +25,7 @@ describe('NewContentForm', () => {
     const statLabels = <StatLabels stats={stats} />;
 
     it('shows a modal to query to save to server when buttonAdd is clicked and the value of input is not empty', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
@@ -41,7 +41,7 @@ describe('NewContentForm', () => {
         expect(found).toExist();
     });
     it('does not show the modal when buttonAdd is clicked and the value of input is empty', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
@@ -56,7 +56,7 @@ describe('NewContentForm', () => {
         expect(notFound).toNotExist();
     });
     it('state.rawNewContents is updated while the value of input updated', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
@@ -69,7 +69,7 @@ describe('NewContentForm', () => {
         expect(newContentForm.state.rawNewContents).toBe(rawNewContents);
     });
     it('calls props.addNewContents method with save=true when modal\'s Save button clicked', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
@@ -87,7 +87,7 @@ describe('NewContentForm', () => {
         expect(toSave).toBe(true);
     });
     it('calls props.addNewContents method with save=false when modal\'s No button clicked', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
@@ -105,7 +105,7 @@ describe('NewContentForm', () => {
         expect(toSave).toBe(false);
     });
     it('calls props.addNewContents method with newContentArray is correctly set', () => {
-        // render StatLabels in the document
+        // render NewContentForm in the document
         var newContentForm = TestUtils.renderIntoDocument(
             <NewContentForm statLabels={statLabels} addNewContents={addNewContents}/>
         );
