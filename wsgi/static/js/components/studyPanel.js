@@ -50,10 +50,17 @@ var StudyPanel = React.createClass({
         }
         
         oldState.hanziIndex += 1;
+
+        console.log('StudyPanel::updateProgress() addtoknows: ', addToKnowns, 
+            'knowns: ', oldState.knowns,
+            'unknowns: ', oldState.unknowns,
+            'hanziIndex:', oldState.hanziIndex);
+
         if (oldState.hanziIndex < this.props.hanzis.length) {
             this.setState(oldState);
         } else {
-            this.props.sessionDoneHandler(this.state.knowns, this.state.unknowns);
+            this.props.sessionDoneHandler(oldState.knowns, oldState.unknowns);
+            this.setState(this.getInitialState());
         }
     },
     
@@ -78,7 +85,7 @@ var StudyPanel = React.createClass({
         const hanzi = this.props.hanzis ? this.props.hanzis[this.state.hanziIndex] : '';
 
         return (
-            <div>
+            <div key={this.props.hanzis}>
                 <NewContentForm ref='StudyPanel_newContentForm' statLabels={statLabels} addNewContents={this.addNewContents} />
                 <ReactBootstrap.ProgressBar ref='StudyPanel_progressBar' max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
                 <ClickableSpan ref='StudyPanel_clickableSpan' content={hanzi} clickHandler={this.addToKnowns} fontClass={fontClass} />

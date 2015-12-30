@@ -34,3 +34,5 @@ var Util = (function() {
         csrfSafeMethod: csrfSafeMethod
     };
 })();
+
+module.exports = Util;

@@ -59,6 +59,9 @@ var NewContentForm = React.createClass({
         if (rawNewContents) {
             newContentsArray = this.state.rawNewContents.match(/\S+/g);
         }
+        if (!newContentsArray) {
+            newContentsArray = [];
+        }
         return newContentsArray;
     },
 

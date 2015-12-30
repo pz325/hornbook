@@ -5,7 +5,7 @@ var ReactBootstrap = require('react-bootstrap');
 
 var ClickableSpan = React.createClass({
     propTypes: {
-        content: React.PropTypes.string.isRequired,
+        content: React.PropTypes.string,
         clickHandler: React.PropTypes.func.isRequired,
         fontClass: React.PropTypes.string
     },

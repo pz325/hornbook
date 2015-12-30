@@ -205,13 +205,26 @@ describe('NewContentForm', () => {
         expect(unknowns).toInclude(hanzis[1]);
     });
 
-    it('props.newContentAddedHandler is called', () => {
+    it('props.newContentAddedHandler is called');
+
+    it('state is reset when session done', () => {
         // render StudyPanel in the document
         var studyPanel = TestUtils.renderIntoDocument(
             <StudyPanel hanzis={hanzis} stats={stats}
                 recapMode={false}
-                sessionDoneHandler={sessionDoneHandler}
-                newContentAddedHandler={newContentAddedHandler} />
+                sessionDoneHandler={sessionDoneHandler} />
         );
+
+        studyPanel.state.hanziIndex = hanzis.length - 1;
+        studyPanel.state.knowns.push(hanzis[0]);
+        studyPanel.state.knowns.push(hanzis[2]);
+        studyPanel.state.unknowns.push(hanzis[1]);
+
+        var buttonAddToKnown = studyPanel.refs.StudyPanel_buttonAddToUnknown;
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(buttonAddToKnown));
+
+        expect(studyPanel.state.hanziIndex).toBe(0);
+        expect(studyPanel.state.knowns.length).toBe(0);
+        expect(studyPanel.state.unknowns.length).toBe(0);
     });
 });

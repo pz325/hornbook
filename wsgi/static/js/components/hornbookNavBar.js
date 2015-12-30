@@ -16,6 +16,7 @@ const HornbookNavbar = React.createClass({
     propTypes:{
         categories: React.PropTypes.array.isRequired,   // array of {'category': , 'display': }
         username: React.PropTypes.string,
+        navItemClickHandler: React.PropTypes.func
     },
 
     login: function() {
@@ -24,10 +25,6 @@ const HornbookNavbar = React.createClass({
 
     logout: function() {
         window.location.href = '/accounts/logout/';
-    },
-
-    handleCategoryNavItemClick: function(category) {
-        this.props.studyCategory(category);
     },
 
     render: function() {
@@ -43,11 +40,11 @@ const HornbookNavbar = React.createClass({
                         <Navbar.Toggle />
                     </Navbar.Header>
                     <Navbar.Collapse>
-                        <StudyCategoryNavItems ref='HornbookNavBar_studyCategoryNavItems' categories={this.props.categories} navItemClickHandler={this.handleCategoryNavItemClick} />
+                        <StudyCategoryNavItems ref='HornbookNavBar_studyCategoryNavItems' categories={this.props.categories} navItemClickHandler={this.props.navItemClickHandler} />
                         <Nav>
                             <NavItem href="#"><Glyphicon glyph="plus"/></NavItem>
                         </Nav>
-                        <UserNavDropdown username={this.props.username} logInHandler={this.login} logOutHandler={this.logout} />
+                        <UserNavDropdown ref='HornbookNavbar_userNavDropdown' username={this.props.username} logInHandler={this.login} logOutHandler={this.logout} />
                     </Navbar.Collapse>
                     
                 </Navbar>

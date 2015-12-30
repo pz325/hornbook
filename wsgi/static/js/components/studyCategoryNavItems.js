@@ -10,13 +10,17 @@ const StudyCategoryNavItems = React.createClass({
         navItemClickHandler: React.PropTypes.func
     },
 
+    navItemClickHandler: function(category) {
+        this.props.navItemClickHandler(category);
+    },
+
     render: function() {
         var component = this;
         var categoryNavItems = this.props.categories.map(function(category) {
             const ref = 'StudyCategoryNavItems_navItem' + category;
             return (
                 <li ref = {ref} key={category.category}>
-                    <a href='#' onClick={component.props.navItemClickHandler.bind(component, category.category)}>
+                    <a href='#' onClick={component.navItemClickHandler.bind(null, category.category)}>
                     {category.display}
                     </a>
                 </li>
