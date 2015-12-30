@@ -1,4 +1,4 @@
-$ = jQuery = require('jquery');
+// $ = jQuery = require('jquery');
 
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -116,7 +116,6 @@ var App = React.createClass({
 
     render: function() {
         console.log('App::render() username:', username);
-        //StudyAPI.testMethod();
         return (
             <div>
                 <HornbookNavBar categories={categories} username={username} navItemClickHandler={this.studyCategory} />

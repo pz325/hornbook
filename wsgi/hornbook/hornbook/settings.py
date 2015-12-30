@@ -147,7 +147,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 STATICFILES_DIRS = (
-    os.path.join(DJ_PROJECT_DIR, '../../static'),
+    os.path.join(DJ_PROJECT_DIR, '../../dist'),
 )
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

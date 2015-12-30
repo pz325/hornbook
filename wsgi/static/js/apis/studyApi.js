@@ -1,5 +1,5 @@
-$ = jQuery = require('jquery');
-var Notify = require('../libs/notify');
+// $ = jQuery = require('jquery');
+// require('../libs/notify');
 
 var StudyAPI = (function() {
     const API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
@@ -30,6 +30,7 @@ var StudyAPI = (function() {
     /*
      * @param knowns an array
      * @param unknowns an array
+     * @param category string
      * @return $.ajax()
      */
     var updateLeitnerRecord = function(knowns, unknowns, category) {
@@ -48,24 +49,19 @@ var StudyAPI = (function() {
             dataType: "json",
             success: function(resp) {
                 console.log('success with resp: ', resp);
-                Notify.notify("Updated", "success");
+                $.notify("Updated", "success");
             },
             error: function(resp) {
                 console.log('failed with resp: ', resp);
-                Notify.notify("Updating study history failed", "warn");
+                $.notify("Updating study history failed", "warn");
             }
             });
     };
 
-    var testMethod = function() {
-        console.log(Notify);
-    }
-
     return {
         updateLeitnerRecord: updateLeitnerRecord,
         getLeitnerRecord: getLeitnerRecord,
-        getProgress: getProgress,
-        testMethod: testMethod
+        getProgress: getProgress
     };
 })();
 

@@ -5,8 +5,8 @@ from django.shortcuts import redirect
 
 @login_required
 def index(request):
-    return redirect('hornbook.views.study')
-    # return render(request, 'index.html')
+    # return redirect('hornbook.views.study')
+    return render(request, 'index.html')
 
 
 @login_required

@@ -13,6 +13,7 @@ var config = {
     paths: {
         html: './static/*.html',
         js: './static/**/*.js',
+        jsLibs: './static/js/libs/*.js',
         css: [
             'node_modules/bootstrap/dist/css/bootstrap.min.css',
             'node_modules/bootstrap/dist/css/bootstrap-theme.min.css',
@@ -36,6 +37,8 @@ gulp.task('js', function() {
         .bundle()
         .on('error', console.error.bind(console))
         .pipe(source('bundle.js'))
+        .pipe(gulp.dest(config.paths.dist + '/js'));
+    gulp.src(config.paths.jsLibs)
         .pipe(gulp.dest(config.paths.dist + '/js'));
 });
 
