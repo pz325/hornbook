@@ -35004,15 +35004,15 @@ var BadgeList = React.createClass({displayName: "BadgeList",
     },
 
     render: function() {
-        var contents = this.props.contents.map(function(unknown) {
-            const ref = 'badgeList_' + unknown;
-            return (React.createElement(ReactBootstrap.Badge, {ref: ref, key: ref}, unknown))
+        var contents = this.props.contents.map(function(content) {
+            const ref = 'badgeList_' + content;
+            return (React.createElement(ReactBootstrap.Badge, {ref: ref, key: ref}, content))
         });
         return (
             React.createElement("div", null, 
                 contents
             )
-        )
+        )       
     }
 });
 
@@ -35021,7 +35021,6 @@ module.exports = BadgeList;
 "use strict";
 
 var React = require('react');
-var ReactBootstrap = require('react-bootstrap');
 
 var ClickableSpan = React.createClass({displayName: "ClickableSpan",
     propTypes: {
@@ -35040,7 +35039,7 @@ var ClickableSpan = React.createClass({displayName: "ClickableSpan",
 });
 
 module.exports = ClickableSpan;
-},{"react":398,"react-bootstrap":234}],406:[function(require,module,exports){
+},{"react":398}],406:[function(require,module,exports){
 "use strict";
 
 var React = require('react');

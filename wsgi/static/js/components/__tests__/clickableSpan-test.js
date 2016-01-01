@@ -1,6 +1,5 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var ReactBootstrap = require('react-bootstrap');
 var TestUtils = require('react-addons-test-utils');
 var expect = require('expect');
 
