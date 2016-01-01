@@ -29,7 +29,7 @@ SECRET_KEY = SECRETS['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG') == 'True'
-DEBUG = True
+# DEBUG = True
 
 from socket import gethostname
 ALLOWED_HOSTS = [
@@ -151,7 +151,7 @@ STATICFILES_DIRS = (
 )
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
+        'rest_framework.pe·rmissions.IsAuthenticated'
     ],
     'PAGE_SIZE': 10
 }
