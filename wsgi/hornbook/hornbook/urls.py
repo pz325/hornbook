@@ -41,7 +41,6 @@ urlpatterns = [
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
     url(r'^$', 'hornbook.views.index'),
-    url(r'^study/$', 'hornbook.views.study'),
 
     # log in/out
     url(r'^accounts/login/$', 'django.contrib.auth.views.login',

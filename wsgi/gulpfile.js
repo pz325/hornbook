@@ -11,13 +11,13 @@ var config = {
     port: 8000,
     devBaseUrl: 'http://localhost',
     paths: {
-        html: './static/*.html',
-        js: './static/**/*.js',
-        jsLibs: './static/js/libs/*.js',
+        html: './static_src/*.html',
+        js: './static_src/**/*.js',
+        jsLibs: './static_src/js/libs/*.js',
         css: [
             'node_modules/bootstrap/dist/css/bootstrap.min.css',
             'node_modules/bootstrap/dist/css/bootstrap-theme.min.css',
-            './static/**/*.css'
+            './static_src/**/*.css'
         ],
         glyphicons: [
             'node_modules/bootstrap/fonts/glyphicons-halflings-regular.eot',
@@ -27,7 +27,8 @@ var config = {
             'node_modules/bootstrap/fonts/glyphicons-halflings-regular.woff2'
         ],
         dist: './dist',
-        mainJs: './static/js/main.js'
+        mainJs: './static_src/js/main.js',
+        favicon: './static_src/favicon.ico',
     }
 }
 
@@ -51,6 +52,11 @@ gulp.task('css', function(){
 gulp.task('glyphicons', function() {
     gulp.src(config.paths.glyphicons)
         .pipe(gulp.dest(config.paths.dist + '/fonts'));
+});
+
+gulp.task('favicon', function() {
+    gulp.src(config.path.favicon)
+        .pipe(gulp.dest(config.paths.dist));
 });
 
 gulp.task('watch', function() {
