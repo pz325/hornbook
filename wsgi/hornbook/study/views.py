@@ -120,7 +120,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         '''
         all_records = self.get_queryset()
 
-        NUM_RETIRED = 10
+        NUM_RETIRED = 15
         num_retired_key = 'num_retired'
         num_retired = int(request.query_params[num_retired_key]) if num_retired_key in request.query_params else NUM_RETIRED
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user, category=self.category_instance)
