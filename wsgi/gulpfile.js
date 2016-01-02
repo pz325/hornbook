@@ -5,7 +5,8 @@ var browserify = require('browserify'); // Bundles JS
 var reactify = require('reactify');  // Transforms React JSX to JS
 var source = require('vinyl-source-stream'); // use conventional text streams with Gulp
 var concat = require('gulp-concat'); //concatenate files
-
+var uglify = require('gulp-uglify');
+var buffer = require('vinyl-buffer');
 
 var config = {
     port: 8000,
@@ -38,6 +39,8 @@ gulp.task('js', function() {
         .bundle()
         .on('error', console.error.bind(console))
         .pipe(source('bundle.js'))
+        .pipe(buffer())
+        .pipe(uglify())
         .pipe(gulp.dest(config.paths.dist + '/js'));
     gulp.src(config.paths.jsLibs)
         .pipe(gulp.dest(config.paths.dist + '/js'));

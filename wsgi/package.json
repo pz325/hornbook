@@ -29,6 +29,8 @@
     "gulp-concat": "*",
     "bootstrap": "*",
     "jquery": "*",
-    "reactify": "*"
+    "reactify": "*",
+    "gulp-uglify": "*",
+    "vinyl-buffer": "*"
   }
 }
