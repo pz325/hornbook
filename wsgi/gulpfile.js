@@ -42,8 +42,8 @@ gulp.task('js', function() {
         .bundle()
         .on('error', console.error.bind(console))
         .pipe(source('bundle.js'))
-        // .pipe(buffer())
-        // .pipe(uglify())
+        .pipe(buffer())
+        .pipe(uglify())
         .pipe(gulp.dest(config.paths.dist + '/js'));
     gulp.src(config.paths.jsLibs)
         .pipe(gulp.dest(config.paths.dist + '/js'));
