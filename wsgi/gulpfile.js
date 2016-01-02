@@ -18,7 +18,10 @@ var config = {
         css: [
             'node_modules/bootstrap/dist/css/bootstrap.min.css',
             'node_modules/bootstrap/dist/css/bootstrap-theme.min.css',
-            './static_src/**/*.css'
+            './static_src/**/*.css',
+        ],
+        css_map: [
+            'node_modules/bootstrap/dist/css/bootstrap.min.css.map'
         ],
         glyphicons: [
             'node_modules/bootstrap/fonts/glyphicons-halflings-regular.eot',
@@ -39,8 +42,8 @@ gulp.task('js', function() {
         .bundle()
         .on('error', console.error.bind(console))
         .pipe(source('bundle.js'))
-        .pipe(buffer())
-        .pipe(uglify())
+        // .pipe(buffer())
+        // .pipe(uglify())
         .pipe(gulp.dest(config.paths.dist + '/js'));
     gulp.src(config.paths.jsLibs)
         .pipe(gulp.dest(config.paths.dist + '/js'));
@@ -57,6 +60,11 @@ gulp.task('glyphicons', function() {
         .pipe(gulp.dest(config.paths.dist + '/fonts'));
 });
 
+gulp.task('css_map', function() {
+    gulp.src(config.paths.css_map)
+        .pipe(gulp.dest(config.paths.dist + '/css'));
+}) ;
+
 gulp.task('favicon', function() {
     gulp.src(config.path.favicon)
         .pipe(gulp.dest(config.paths.dist));
@@ -68,4 +76,4 @@ gulp.task('watch', function() {
     gulp.watch(config.paths.css, ['css']);
 });
 
-gulp.task('default', ['js', 'watch', 'css', 'glyphicons']);
+gulp.task('default', ['js', 'watch', 'css', 'css_map', 'glyphicons']);

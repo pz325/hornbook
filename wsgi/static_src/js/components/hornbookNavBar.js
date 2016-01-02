@@ -12,7 +12,7 @@ var StudyCategoryNavItems = require('./studyCategoryNavItems');
 var UserNavDropdown = require('./userNavDropdown');
 
 
-const HornbookNavbar = React.createClass({
+var HornbookNavbar = React.createClass({
     propTypes:{
         categories: React.PropTypes.array.isRequired,   // array of {'category': , 'display': }
         username: React.PropTypes.string,

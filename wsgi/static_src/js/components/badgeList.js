@@ -10,7 +10,7 @@ var BadgeList = React.createClass({
 
     render: function() {
         var contents = this.props.contents.map(function(content) {
-            const ref = 'badgeList_' + content;
+            var ref = 'badgeList_' + content;
             return (<ReactBootstrap.Badge ref={ref} key={ref}>{content}</ReactBootstrap.Badge>)
         });
         return (

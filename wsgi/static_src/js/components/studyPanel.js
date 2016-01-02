@@ -79,10 +79,10 @@ var StudyPanel = React.createClass({
     render: function() {
         var statLabels = <StatLabels stats={this.props.stats} />;
         
-        const progressMax = this.props.hanzis.length;
-        const progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
-        const fontClass = this.props.fontClass ? this.props.fontClass : 'han_character';
-        const hanzi = this.props.hanzis ? this.props.hanzis[this.state.hanziIndex] : '';
+        var progressMax = this.props.hanzis.length;
+        var progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
+        var fontClass = this.props.fontClass ? this.props.fontClass : 'han_character';
+        var hanzi = this.props.hanzis ? this.props.hanzis[this.state.hanziIndex] : '';
 
         return (
             <div key={this.props.hanzis}>

@@ -2,8 +2,8 @@
 // require('../libs/notify');
 
 var StudyAPI = (function() {
-    const API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
-    const API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
+    var API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
+    var API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
     
     var getLeitnerRecord = function(category) {
         console.log('StudyAPI::getLeitnerRecord() category: ', category);

@@ -66,10 +66,10 @@ var NewContentForm = React.createClass({
     },
 
     render: function() {
-        const newContentsArray = this.getNewContentsArray(this.state.rawNewContents);
-        const newContentsStr = newContentsArray.join();
+        var newContentsArray = this.getNewContentsArray(this.state.rawNewContents);
+        var newContentsStr = newContentsArray.join();
 
-        const buttonAdd = <ReactBootstrap.Button bsStyle="info" onClick={this.handleButtonAddClick} ref='NewContentForm_buttonAdd'><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
+        var buttonAdd = <ReactBootstrap.Button bsStyle="info" onClick={this.handleButtonAddClick} ref='NewContentForm_buttonAdd'><ReactBootstrap.Glyphicon glyph="plus"/></ReactBootstrap.Button>;
         
 
         return (

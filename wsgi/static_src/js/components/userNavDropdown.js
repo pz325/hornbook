@@ -7,7 +7,7 @@ var MenuItem = require('react-bootstrap').MenuItem;
 var Glyphicon = require('react-bootstrap').Glyphicon;
 
 
-const UserNavDropdown = React.createClass({
+var UserNavDropdown = React.createClass({
     propTypes:{
         username: React.PropTypes.string,
         logInHandler: React.PropTypes.func,

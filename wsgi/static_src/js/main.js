@@ -16,8 +16,8 @@ $.ajaxSetup({
     }
 });
 
-const username = $("#app").attr("data-username");
-const categories = [{'category': 'read_hanzi', 'display': '认字'},
+var username = $("#app").attr("data-username");
+var categories = [{'category': 'read_hanzi', 'display': '认字'},
         {'category': 'write_hanzi', 'display': '写字'},
         {'category': 'chinese_poem', 'display': '古诗'}
     ];
@@ -72,7 +72,7 @@ var App = React.createClass({
     _initStudyPanel: function(category) {
         console.log('App::_initStudyPanel() category: ', category);
         var component = this;
-        const fontClass = category === "chinese_poem" ? "han_character_small" : "han_character";
+        var fontClass = category === "chinese_poem" ? "han_character_small" : "han_character";
 
         $.when(StudyAPI.getLeitnerRecord(category), StudyAPI.getProgress(category))
         .done(function(leitnerRecordResp, progressResp){
