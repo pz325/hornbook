@@ -6,3 +6,7 @@
 .project
 .pydevproject
 node_modules
+db.sqlite3
+*.log
+migrations
+dist
