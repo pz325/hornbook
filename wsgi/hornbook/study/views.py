@@ -20,6 +20,8 @@ from study.serializers import CategorySerializer
 import leitner
 import random
 import jsonpickle
+import logging
+log = logging.getLogger('hornbook')
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -141,6 +143,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         ret = ret + [h for h in picked_retired]
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
+        log.debug(study_count)
+        log.debug(serializer.data)
         return Response(serializer.data)
 
     def _set_leitner_record(self, request):
