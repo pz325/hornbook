@@ -163,6 +163,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
         study_count = get_object_or_404(HanziStudyCount, user=request.user, category=self.category_instance)
+        log.debug(study_count)
+        log.debug(request.data)
 
         grasped_hanzi = jsonpickle.decode(grasped_hanzi)
         new_hanzi = jsonpickle.decode(new_hanzi)
@@ -196,6 +198,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         # update session count
         study_count.count += 1
         study_count.save()
+        log.debug(study_count)
         return Response(request.data)
 
 
