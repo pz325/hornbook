@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+admin.autodiscover()
 # from django.views.generic import TemplateView
 
 from rest_framework import routers
@@ -35,16 +36,18 @@ router.register(r'study/user', UserViewSet, base_name='user')
 router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet, base_name='hanzi')
 
 urlpatterns = [
+    url(r'^accounts/', include('allauth.urls')),
     url(r'^api/', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
+
     url(r'^api-admin/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
     url(r'^$', 'hornbook.views.index'),
 
     # log in/out
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login',
-        {'template_name': 'login.html'}),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout',
-        {'next_page': '/'}),
+    # url(r'^accounts/login/$', 'django.contrib.auth.views.login',
+    #     {'template_name': 'login.html'}),
+    # url(r'^accounts/logout/$', 'django.contrib.auth.views.logout',
+    #     {'next_page': '/'}),
 ]

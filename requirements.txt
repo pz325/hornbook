@@ -8,3 +8,4 @@ markdown >= 2.1.0
 django-rest-swagger
 jsonpickle >= 0.8
 mysql-python
+django-allauth
