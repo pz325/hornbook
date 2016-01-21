@@ -23,6 +23,21 @@ STUDY_RECORD_STATUS = (
     )
 
 
+class StudySessionContentLog(models.Model):
+    date = models.DateTimeField(auto_now=True)
+    session_count = models.PositiveSmallIntegerField(default=0)
+    category = models.CharField(max_length=200)
+    contents = models.TextField()
+
+
+class StudySessionResultLog(models.Model):
+    date = models.DateTimeField(auto_now=True)
+    session_count = models.PositiveSmallIntegerField(default=0)
+    category = models.CharField(max_length=200)
+    grasped_contents = models.TextField()
+    new_contents = models.TextField()
+
+
 class Category(models.Model):
     unique_name = models.CharField(max_length=200, editable=False, unique=True, db_index=True)
     name = models.CharField(max_length=100, db_index=True)

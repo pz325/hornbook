@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from study.models import HanziStudyCount
 from study.models import HanziStudyRecord
 from study.models import Category
+from study.models import StudySessionContentLog
+from study.models import StudySessionResultLog
 from lexicon.models import Hanzi
 
 from study.serializers import HanziStudyCountSerializer
@@ -143,8 +145,10 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         ret = ret + [h for h in picked_retired]
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
-        log.debug(study_count)
-        log.debug(serializer.data)
+        # log.debug(study_count)
+        # log.debug(serializer.data)
+        contents = ' '.join([h.hanzi.content for h in ret])
+        StudySessionContentLog.objects.create(session_count=study_count.count, category=self.category_instance.unique_name, contents=contents)
         return Response(serializer.data)
 
     def _set_leitner_record(self, request):
@@ -198,7 +202,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         # update session count
         study_count.count += 1
         study_count.save()
-        log.debug(study_count)
+        # log.debug(study_count)
+        StudySessionResultLog.objects.create(session_count=study_count.count, category=self.category_instance.unique_name, grasped_contents=' '.join(grasped_hanzi), new_contents=' '.join(new_hanzi))
         return Response(request.data)
 
 
