@@ -32,7 +32,7 @@ SECRET_KEY = SECRETS['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG') == 'True'
-# DEBUG = True
+DEBUG = True
 
 from socket import gethostname
 ALLOWED_HOSTS = [
