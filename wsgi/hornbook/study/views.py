@@ -130,25 +130,29 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user, category=self.category_instance)
         deck_ids = leitner.decks_to_review(study_count.count)
 
-        ret = []
-        ret = ret + [h for h in all_records.filter(leitner_deck='C')]  # current deck
+        current_deck_contents = [h for h in all_records.filter(leitner_deck='C')]  # current deck
+        progress_deck_contents = []
         for i in deck_ids:
-            ret = ret + [h for h in all_records.filter(leitner_deck=i)]  # progres deck
+            progress_deck_contents = progress_deck_contents + [h for h in all_records.filter(leitner_deck=i)]  # progres deck
 
         retired_deck = all_records.filter(leitner_deck='R')
         index = range(0, len(retired_deck))
         random.shuffle(index)
         picked_retired = [retired_deck[i] for i in index[:num_retired]]
-        # for r in picked_retired:
-        #     r.repeat_count += 1
-        #     r.save()
-        ret = ret + [h for h in picked_retired]
+        retired_deck_contents = [h for h in picked_retired]
+
+        ret = current_deck_contents + progress_deck_contents + retired_deck_contents
 
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
         # log.debug(study_count)
         # log.debug(serializer.data)
         contents = ' '.join([h.hanzi.content for h in ret])
-        StudySessionContentLog.objects.create(session_count=study_count.count, category=self.category_instance.unique_name, contents=contents)
+        StudySessionContentLog.objects.create(
+            session_count=study_count.count,
+            category=self.category_instance.unique_name,
+            current_deck_contents=' '.join([h.hanzi.content for h in current_deck_contents]),
+            progress_deck_contents=' '.join([h.hanzi.content for h in progress_deck_contents]),
+            retired_deck_contents=' '.join([h.hanzi.content for h in picked_retired]))
         return Response(serializer.data)
 
     def _set_leitner_record(self, request):

@@ -27,7 +27,9 @@ class StudySessionContentLog(models.Model):
     date = models.DateTimeField(auto_now=True)
     session_count = models.PositiveSmallIntegerField(default=0)
     category = models.CharField(max_length=200)
-    contents = models.TextField()
+    current_deck_contents = models.TextField(blank=True)
+    progress_deck_contents = models.TextField(blank=True)
+    retired_deck_contents = models.TextField(blank=True)
 
 
 class StudySessionResultLog(models.Model):
