@@ -27,6 +27,9 @@ log = logging.getLogger('hornbook')
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
+    '''
+    login required, so by default, filtering against the current user
+    '''
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_class = (permissions.IsAuthenticated,)
@@ -37,37 +40,50 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
 
+    @staticmethod
+    def get_instance(user, name):
+        instance = get_object_or_404(Category, user=user, name=name)
+        return instance
+
 
 class HanziStudyCountViewSet(viewsets.ModelViewSet):
     '''
-    detail: pk -- user's id
+    detail: pk -- category id  e.g. api/study/hanzi_study_count/1"
+
+    login required, so by default, filtering against the current user
     '''
     queryset = HanziStudyCount.objects.all()
     serializer_class = HanziStudyCountSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
-        category_instance = self._get_category()
+        '''
+        required 'category' is part of POST body
+        '''
+        category = None
+        if 'category' in self.request.data:
+            category = self.request.data['category']
+
+        category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
         serializer.save(user=self.request.user, category=category_instance)
 
     def get_queryset(self):
         '''
-        filter by user and category
+        filter by user, and category if asked
         '''
-        category_instance = self._get_category()
-        return HanziStudyCount.objects.filter(user=self.request.user, category=category_instance)
+        queryset = self.queryset.filter(user=self.request.user)
+        category = self.request.query_params.get('category', None)
+        if category is not None:
+            category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+            queryset = self.queryset.filter(category=category_instance)
 
-    def _get_category(self):
-        category_key = 'category'
-        if category_key in self.request.query_params:
-            category_data = self.request.query_params[category_key]
-        if category_key in self.request.data:
-            category_data = self.request.data[category_key]
-        category_instance = get_object_or_404(Category, user=self.request.user, name=category_data)
-        return category_instance
+        return queryset
 
 
 class HanziStudyRecordViewSet(viewsets.ModelViewSet):
+    '''
+    login required, so by default, filtering against the current user
+    '''
     queryset = HanziStudyRecord.objects.all()
     serializer_class = HanziStudyRecordSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -214,6 +230,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 class UserViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
+    '''
+    login required, so by default, filtering against the current user
+    '''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)
