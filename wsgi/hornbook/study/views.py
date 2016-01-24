@@ -90,23 +90,32 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         '''
-        filter by user and category
+        filter by user, and category if provided
         '''
-        category_key = 'category'
-        if category_key in self.request.query_params:
-            category_data = self.request.query_params[category_key]
-        if category_key in self.request.data:
-            category_data = self.request.data[category_key]
-
-        self.category_instance = get_object_or_404(Category, user=self.request.user, name=category_data)
-        return HanziStudyRecord.objects.filter(user=self.request.user, category=self.category_instance)
+        queryset = self.queryset.filter(user=self.request.user)
+        category = self.request.query_params.get('category', None)
+        if category is not None:
+            self.category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+            queryset = self.queryset.filter(category=self.category_instance)
+        else:
+            self.category_instance = None
+        return queryset
 
     def perform_create(self, serializer):
-        hanzi_data = self.request.data['hanzi']
-        category_data = self.request.data['category']
-        hanzi, _ = Hanzi.objects.get_or_create(content=hanzi_data)
-        category = get_object_or_404(Category, user=self.request.user, name=category_data)
-        serializer.save(user=self.request.user, hanzi=hanzi, category=category)
+        '''
+        required fields in the POST data:
+            hanzi
+            category
+        '''
+        category = None
+        if 'category' in self.request.data:
+            category = self.request.data['category']
+        category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+
+        hanzi = self.request.data['hanzi']
+        hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
+
+        serializer.save(user=self.request.user, hanzi=hanzi_instance, category=category_instance)
 
     @list_route(methods=['GET', 'POST'])
     def leitner_record(self, request):
@@ -136,14 +145,20 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
     def _get_leitner_record(self, request):
         '''
-        query parameter: num_retired
+        required query parameter:
+            category
+        optional query parameter:
+            num_retired
         '''
         all_records = self.get_queryset()
 
+        category = request.query_params.get('category', None)
+        category_instance = CategoryViewSet.get_instance(request.user, category)
+
         NUM_RETIRED = 15
-        num_retired_key = 'num_retired'
-        num_retired = int(request.query_params[num_retired_key]) if num_retired_key in request.query_params else NUM_RETIRED
-        study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user, category=self.category_instance)
+        num_retired = request.query_params.get('num_retired', NUM_RETIRED)
+        num_retired = int(num_retired)
+        study_count, _ = HanziStudyCount.objects.get_or_create(user=request.user, category=category_instance)
         deck_ids = leitner.decks_to_review(study_count.count)
 
         current_deck_contents = [h for h in all_records.filter(leitner_deck='C')]  # current deck
@@ -162,10 +177,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         serializer = HanziStudyRecordSerializer(ret, many=True, context={'request': request})
         # log.debug(study_count)
         # log.debug(serializer.data)
-        contents = ' '.join([h.hanzi.content for h in ret])
         StudySessionContentLog.objects.create(
             session_count=study_count.count,
-            category=self.category_instance.unique_name,
+            category=category_instance.unique_name,
             current_deck_contents=' '.join([h.hanzi.content for h in current_deck_contents]),
             progress_deck_contents=' '.join([h.hanzi.content for h in progress_deck_contents]),
             retired_deck_contents=' '.join([h.hanzi.content for h in picked_retired]))
@@ -182,11 +196,16 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         '''
         all_records = self.get_queryset()
 
+        category = None
+        if 'category' in self.request.data:
+            category = self.request.data['category']
+        category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+
         grasped_hanzi_key = 'grasped_hanzi'
         new_hanzi_key = 'new_hanzi'
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
-        study_count = get_object_or_404(HanziStudyCount, user=request.user, category=self.category_instance)
+        study_count = get_object_or_404(HanziStudyCount, user=request.user, category=category_instance)
         log.debug(study_count)
         log.debug(request.data)
 
@@ -196,7 +215,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         for hanzi in grasped_hanzi:
             hanzi_instance, is_new_hanzi = Hanzi.objects.get_or_create(content=hanzi)
             if not is_new_hanzi:
-                study_record = all_records.get(hanzi=hanzi_instance, category=self.category_instance)
+                study_record = all_records.get(hanzi=hanzi_instance, category=category_instance)
                 study_record.repeat_count += 1
                 # move from Deck Current to Session Deck
                 if study_record.leitner_deck == 'C':
@@ -216,14 +235,17 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
                 study_record.repeat_count += 1
                 study_record.save()
             else:
-                category_instance = get_object_or_404(Category, user=request.user, name=request.data['category'])
                 HanziStudyRecord.objects.create(user=request.user, category=category_instance, hanzi=hanzi_instance)
 
         # update session count
         study_count.count += 1
         study_count.save()
         # log.debug(study_count)
-        StudySessionResultLog.objects.create(session_count=study_count.count, category=self.category_instance.unique_name, grasped_contents=' '.join(grasped_hanzi), new_contents=' '.join(new_hanzi))
+        StudySessionResultLog.objects.create(
+            session_count=study_count.count,
+            category=category_instance.unique_name,
+            grasped_contents=' '.join(grasped_hanzi),
+            new_contents=' '.join(new_hanzi))
         return Response(request.data)
 
 
