@@ -5,22 +5,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from lexicon.models import Hanzi
 from django.contrib import admin
-import django.utils.timezone
-from django.contrib.auth.decorators import login_required
-
 import leitner
-
 '''
 Leitner system, a spaced repetition method.
 refer to http://en.wikipedia.org/wiki/Leitner_system
 Here we implements the Example Two
 '''
-
-STUDY_RECORD_STATUS = (
-    ('N', 'New'),
-    ('S', 'Studying'),
-    ('G', 'Grasped'),
-    )
 
 
 class StudySessionContentLog(models.Model):
@@ -57,7 +47,6 @@ class StudyRecord(models.Model):
     user = models.ForeignKey(User, editable=False, db_index=True, related_name='study_records')
     study_date = models.DateTimeField(auto_now=True)
     revise_date = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=1, choices=STUDY_RECORD_STATUS, default='N')
     repeat_count = models.PositiveSmallIntegerField(default=0)
     forget_count = models.PositiveSmallIntegerField(default=0)
 
@@ -150,11 +139,6 @@ def importGAEData():
 
             if deck == 'P':
                 deck = 'R'
-            study_status = 'S'
-            if deck == 'R':
-                study_status = 'G'
-            if deck == 'C':
-                study_status = 'N'
 
             if (user_id == '5838406743490560'):
                 leitner_record = {
@@ -177,6 +161,5 @@ def importGAEData():
                     repeat_count=leitner_record['forget_times'],
                     study_date=leitner_record['last_study_datetime'],
                     revise_date=leitner_record['last_study_datetime'],
-                    status=study_status
                     )
     print('done')

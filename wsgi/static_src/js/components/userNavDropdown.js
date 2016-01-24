@@ -35,11 +35,11 @@ var UserNavDropdown = React.createClass({
         }
 
         return (
-            <div>
+            //<div>
                 <Nav pullRight>
                     {userNavItems}
                 </Nav>
-            </div>
+            //</div>
         );
     }
 });
