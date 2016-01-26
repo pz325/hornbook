@@ -63,8 +63,7 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
         category = None
         if 'category' in self.request.data:
             category = self.request.data['category']
-
-        category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+        category_instance = get_object_or_404(Category, user=self.request.user, name=category)
         serializer.save(user=self.request.user, category=category_instance)
 
     def get_queryset(self):
@@ -95,10 +94,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(user=self.request.user)
         category = self.request.query_params.get('category', None)
         if category is not None:
-            self.category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
-            queryset = self.queryset.filter(category=self.category_instance)
-        else:
-            self.category_instance = None
+            category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+            queryset = self.queryset.filter(category=category_instance)
         return queryset
 
     def perform_create(self, serializer):
@@ -110,7 +107,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         category = None
         if 'category' in self.request.data:
             category = self.request.data['category']
-        category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+        category_instance = get_object_or_404(Category, user=self.request.user, name=category)
 
         hanzi = self.request.data['hanzi']
         hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)

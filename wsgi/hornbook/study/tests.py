@@ -64,7 +64,7 @@ class CategoryTests(APITestCase):
         self.user = _create_one_User_instance(self.username)
         self.client.force_authenticate(user=self.user)
 
-    def test_create_Category(self):
+    def test_create(self):
         # arrange
         url = reverse('category-list')
         name = 'category'
@@ -78,7 +78,7 @@ class CategoryTests(APITestCase):
         self.assertEqual(Category.objects.filter(user=self.user).count(), 1)
         self.assertEqual(Category.objects.get(user=self.user).name, name)
 
-    def test_list_Category(self):
+    def test_list(self):
         # arrange
         name = 'category'
         _create_one_Category_instance(self.user, name)
@@ -92,7 +92,7 @@ class CategoryTests(APITestCase):
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['name'], name)
 
-    def test_get_one_Category(self):
+    def test_get_one(self):
         # arrange
         numToCreate = randint(20, 40)
         names = self._create_Category_instances(numToCreate)
@@ -106,7 +106,7 @@ class CategoryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], names[index])
 
-    def test_put_one_Category(self):
+    def test_put_one(self):
         # arrange
         numToCreate = randint(20, 40)
         self._create_Category_instances(numToCreate)
@@ -123,7 +123,7 @@ class CategoryTests(APITestCase):
         self.assertEqual(Category.objects.filter(user=self.user).count(), numToCreate)
         self.assertEqual(Category.objects.filter(user=self.user)[index].name, nameToBe)
 
-    def test_delete_one_Category(self):
+    def test_delete_one(self):
         # arrange
         numToCreate = randint(20, 40)
         self._create_Category_instances(numToCreate)
@@ -175,7 +175,7 @@ class HanziStudyCountViewSetTests(APITestCase):
         another_category = _create_one_Category_instance(another_user, 'another_category')
         _create_one_HanziStudyCount_instance(another_user, another_category, 10)
 
-    def test_create_expecting_404_when_without_category_parameter(self):
+    def test_create_response_404_when_without_category_parameter(self):
         # arrange
         count = 3
         data = {'count': count}
@@ -350,7 +350,26 @@ class HanziStudyRecordViewSetTests(APITestCase):
         another_category = _create_one_Category_instance(another_user, 'category_for_another_user')
         _create_one_HanziStudyRecord_instance(another_user, another_category, u'王')
 
-    def test_list_HanziStudyRecord(self):
+    def test_list_without_catetory_parameter(self):
+        # arrange
+        hanzi = u'东'
+        category = _create_one_Category_instance(self.user, 'categoryA')
+        _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
+
+        hanzi = u'南'
+        category = _create_one_Category_instance(self.user, 'categoryB')
+        _create_one_HanziStudyRecord_instance(self.user, category, hanzi)
+
+        # act
+        url = reverse('hanzistudyrecord-list')
+        response = self.client.get(url, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)
+        pass
+
+    def test_list(self):
         # arrange
         hanzis = [u'东', u'南']
         for h in hanzis:
@@ -364,7 +383,19 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 2)
 
-    def test_create_HanziStudyRecord(self):
+    def test_create_reponse_400_when_without_category_parameter(self):
+        # arrange
+        url = reverse('hanzistudyrecord-list')
+        hanzi = u'东'
+        data = {'hanzi': hanzi}
+
+        # act
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create(self):
         # arrange
         url = reverse('hanzistudyrecord-list')
         hanzi = u'东'
@@ -379,21 +410,26 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(Hanzi.objects.filter(content=hanzi).count(), 1)
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, category=self.category).hanzi, Hanzi.objects.get(content=hanzi))
 
-    def test_get_one_HanziStudyRecord(self):
+    def test_get_one(self):
+        '''
+        pk -- HanziStudyRecord id
+        '''
         # arrange
         hanzi = u'东'
         hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
 
         # act
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
-        url += '?category={category}'.format(category=self.category.name)
         response = self.client.get(url, format='json')
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['hanzi'], hanzi)
 
-    def test_put_one_HanziStudyRecord(self):
+    def test_put_one(self):
+        '''
+        pk -- HanziStudyRecord id
+        '''
         # arrange
         hanzi = u'东'
         hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
@@ -402,7 +438,6 @@ class HanziStudyRecordViewSetTests(APITestCase):
         hanzi = u'王'
         data = {'hanzi': hanzi, 'category': self.category.name}
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
-        # url += '?category={category}'.format(category=category.name)
         response = self.client.put(url, data=data, format='json')
 
         # assert
@@ -410,19 +445,35 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 1)
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user), hanzi_study_record_instance)
 
-    def test_delete_one_HanziStudyRecord(self):
+    def test_delete_one(self):
+        '''
+        pk -- HanziStudyRecord id
+        '''
         # arrange
         hanzi = u'东'
         hanzi_study_record_instance = _create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
 
         # act
         url = reverse('hanzistudyrecord-detail', args=[hanzi_study_record_instance.id])
-        url += '?category={category}'.format(category=self.category.name)
         response = self.client.delete(url)
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(HanziStudyRecord.objects.filter(user=self.user).count(), 0)
+
+    def test_get_leitner_record_response_404_without_category_parameter(self):
+        # arrange
+        _create_one_leitner_record(self.user, self.category.name, u'东', 'C')
+        _create_one_leitner_record(self.user, self.category.name, u'南', '1')
+        _create_one_leitner_record(self.user, self.category.name, u'西', '3')
+        _create_one_HanziStudyCount_instance(self.user, self.category, 1)
+
+        # act
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        response = self.client.get(url, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_leitner_record(self):
         # arrange
@@ -459,6 +510,28 @@ class HanziStudyRecordViewSetTests(APITestCase):
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)  # two from deck R
+
+    def test_set_leitner_record_response_404_when_without_category_parameter(self):
+        # arrange
+        retired_hanzis = [u'北', u'春', u'夏', u'冬']
+        _create_one_leitner_record(self.user, self.category.name, u'东', 'C')
+        _create_one_leitner_record(self.user, self.category.name, u'南', '1')
+        _create_one_leitner_record(self.user, self.category.name, u'西', '2')
+        for h in retired_hanzis:
+            _create_one_leitner_record(self.user, self.category.name, h, 'R')
+        _create_one_HanziStudyCount_instance(self.user, self.category, 1)
+
+        # act
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        data = {
+            'grasped_hanzi': json.dumps([u'东', u'西', u'冬']),   # 东 -> deck 1, 西 -> deck R, 冬 -> deck R
+            'new_hanzi': json.dumps([u'李', u'南'])        # 南 -> deck C, new Hanzi, 李 -> deck C
+        }
+
+        response = self.client.post(url, data)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_set_leitner_record(self):
         # arrange
@@ -638,6 +711,3 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'R')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'R')
-
-
-#  add cases for API without category parameters
