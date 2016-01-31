@@ -3,12 +3,14 @@
 <html lang="en">  
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}{% endblock %}</title>
+    <title>HornBook</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Ping Zou">
     <link rel="icon" href="{% static "favicon.ico"%}" type="image/x-icon">
 
-    {% block css %}{% endblock %}
+    <link href="{% static "css/bundle.css"%}" rel="stylesheet" type="text/css" media="all"/> 
+    {% block css %}
+    {% endblock %}
 
     <script type="text/javascript" src="{% static "js/jquery-2.1.4.min.js"%}"></script>
     <script type="text/javascript" src="{% static "js/notify.min.js"%}"></script>
@@ -18,7 +20,7 @@
     {% block extra_head %}{% endblock %}
   </head>
   <body>
-    <div>
+    <div class="container">
       {% block content %}{% endblock %}
     
       <div class="footer">

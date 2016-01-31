@@ -92,7 +92,7 @@ ROOT_URLCONF = 'hornbook.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(DJ_PROJECT_DIR, '../../static_src')],
+        'DIRS': [os.path.join(DJ_PROJECT_DIR, '../../static_src/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
