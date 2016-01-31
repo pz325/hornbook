@@ -25,7 +25,12 @@ class MyAdapter(DefaultAccountAdapter):
 
     def save_user(self, request, user, form, commit=True):
         log.debug('MyAdapter.save_user')
-        return super(MyAdapter, self).save_user(request, user, form, commit)
+        user = super(MyAdapter, self).save_user(request, user, form, commit)
+        setupNewUser(user)
+        return user
+
+    def get_login_redirect_url(self, request):
+        return '/'
 
 
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
