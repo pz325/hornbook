@@ -234,9 +234,10 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             else:
                 HanziStudyRecord.objects.create(user=request.user, category=category_instance, hanzi=hanzi_instance)
 
-        # update session count
-        study_count.count += 1
-        study_count.save()
+        if len(grasped_hanzi) > 0:
+            # update session count
+            study_count.count += 1
+            study_count.save()
         # log.debug(study_count)
         StudySessionResultLog.objects.create(
             session_count=study_count.count,
