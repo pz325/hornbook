@@ -10,6 +10,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from socket import gethostname
+import sys
+
+
 DJ_PROJECT_DIR = os.path.dirname(__file__)
 LOG_DIR = os.path.join(DJ_PROJECT_DIR, '../../log')
 if not os.path.exists(LOG_DIR):
@@ -19,7 +23,6 @@ WSGI_DIR = os.path.dirname(BASE_DIR)
 REPO_DIR = os.path.dirname(WSGI_DIR)
 DATA_DIR = os.environ.get('OPENSHIFT_DATA_DIR', BASE_DIR)
 
-import sys
 sys.path.append(os.path.join(REPO_DIR, 'libs'))
 import secrets
 SECRETS = secrets.getter(os.path.join(DATA_DIR, 'secrets.json'))
@@ -34,15 +37,14 @@ SECRET_KEY = SECRETS['secret_key']
 DEBUG = os.environ.get('DEBUG') == 'True'
 DEBUG = True
 
-from socket import gethostname
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '192.168.0.14',
     gethostname(),  # For internal OpenShift load balancer security purposes.
     os.environ.get('OPENSHIFT_APP_DNS'),  # Dynamically map to the OpenShift gear name.
-    #'example.com', # First DNS alias (set up in the app)
-    #'www.example.com', # Second DNS alias (set up in the app)
+    # 'example.com', # First DNS alias (set up in the app)
+    # 'www.example.com', # Second DNS alias (set up in the app)
 ]
 
 
@@ -107,7 +109,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hornbook.wsgi.application'
 
 
-# Database
+# ======== Database ========
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 # a setting to determine whether we are running on OpenShift
@@ -129,7 +131,6 @@ if ON_OPENSHIFT:
             },
         }
     }
-
 else:
     DATABASES = {
         'default': {
@@ -139,24 +140,18 @@ else:
         }
     }
 
-# Internationalization
+# ======== Internationalization ========
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 SITE_ID = 1
 
-# Static files (CSS, JavaScript, Images)
+# ======== Static files (CSS, JavaScript, Images) ========
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(DJ_PROJECT_DIR, '../../static')
 STATICFILES_FINDERS = (
@@ -166,6 +161,7 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(DJ_PROJECT_DIR, '../../dist'),
 )
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
@@ -173,6 +169,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
+# ======== logging settings ========
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -196,7 +193,7 @@ LOGGING = {
             'formatter': 'standard',
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
@@ -207,11 +204,11 @@ LOGGING = {
             'propagate': True,
             'level': 'WARN',
         },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
+        # 'django.db.backends': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': False,
+        # },
         'hornbook': {
             'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
@@ -219,14 +216,6 @@ LOGGING = {
     }
 }
 
-
-# LOGIN_REDIRECT_URL = '/'
-# SOCIALACCOUNT_QUERY_EMAIL = True
-# SOCIALACCOUNT_PROVIDERS = {
-#     'facebook': {
-#         'SCOPE': ['email'],
-#         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-#         'METHOD': 'oauth2',
-#         'VERIFIED_EMAIL': False
-#     }
-# }
+# ======== allauth settings ========
+ACCOUNT_ADAPTER = 'hornbook.adapters.MyAdapter'
+SOCIALACCOUNT_ADAPTER = 'hornbook.adapters.MySocialAccountAdapter'
