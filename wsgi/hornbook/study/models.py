@@ -37,13 +37,17 @@ class Category(models.Model):
     unique_name = models.CharField(max_length=200, editable=False, unique=True, db_index=True)
     name = models.CharField(max_length=100, db_index=True)
     user = models.ForeignKey(User, editable=False, db_index=True, related_name='categories')
+    display = models.CharField(max_length=200, blank=True)
+    num_retired = models.PositiveSmallIntegerField(default=10)
 
     def save(self, *args, **kwargs):
         self.unique_name = '_'.join([self.name, self.user.username])
+        if not self.display:
+            self.display = self.name
         super(Category, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return self.unique_name
+        return self.display + ': ' + self.unique_name
 
 
 class StudyRecord(models.Model):

@@ -8,10 +8,11 @@ import django.utils.timezone
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    id = serializers.ReadOnlyField()
 
     class Meta:
         model = Category
-        fileds = ('user', 'name')
+        fileds = ('user', 'id', 'name', 'display', 'num_retired')
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):

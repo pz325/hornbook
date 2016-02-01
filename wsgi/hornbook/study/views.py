@@ -143,7 +143,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
     def _get_leitner_record(self, request):
         '''
         required query parameter:
-            category
+            Category
         optional query parameter:
             num_retired
         '''
@@ -203,8 +203,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
         study_count = get_object_or_404(HanziStudyCount, user=request.user, category=category_instance)
-        log.debug(study_count)
-        log.debug(request.data)
+        # log.debug(study_count)
+        # log.debug(request.data)
 
         grasped_hanzi = jsonpickle.decode(grasped_hanzi)
         new_hanzi = jsonpickle.decode(new_hanzi)

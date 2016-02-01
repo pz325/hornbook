@@ -68,7 +68,13 @@ class CategoryTests(APITestCase):
         # arrange
         url = reverse('category-list')
         name = 'category'
-        data = {'name': name}
+        mydisplay = 'mydisplay'
+        num_retired = 15
+        data = {
+            'name': name,
+            'display': mydisplay,
+            'num_retired': num_retired
+        }
 
         # act
         response = self.client.post(url, data, format='json')
@@ -77,6 +83,45 @@ class CategoryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Category.objects.filter(user=self.user).count(), 1)
         self.assertEqual(Category.objects.get(user=self.user).name, name)
+        self.assertEqual(Category.objects.get(user=self.user).display, mydisplay)
+        self.assertEqual(Category.objects.get(user=self.user).num_retired, num_retired)
+
+    def test_create_without_display(self):
+        # arrange
+        url = reverse('category-list')
+        name = 'category'
+        num_retired = 15
+        data = {
+            'name': name,
+            'num_retired': num_retired
+        }
+
+        # act
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Category.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Category.objects.get(user=self.user).name, name)
+        self.assertEqual(Category.objects.get(user=self.user).display, name)  # by default, display = name
+        self.assertEqual(Category.objects.get(user=self.user).num_retired, num_retired)
+
+    def test_create_without_num_retired(self):
+        # arrange
+        url = reverse('category-list')
+        name = 'category'
+        data = {
+            'name': name
+        }
+
+        # act
+        response = self.client.post(url, data, format='json')
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Category.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Category.objects.get(user=self.user).name, name)
+        self.assertEqual(Category.objects.get(user=self.user).num_retired, 10)  # by default, num_retired = 10
 
     def test_list(self):
         # arrange
@@ -113,21 +158,29 @@ class CategoryTests(APITestCase):
         index = randint(0, numToCreate)
 
         # act
-        nameToBe = 'updated_category'
-        data = {'name': nameToBe}
+        name_to_be = 'updated_category'
+        display_to_be = 'updated_display'
+        num_retired_to_be = 35
+        data = {
+            'name': name_to_be,
+            'display': display_to_be,
+            'num_retired': num_retired_to_be
+        }
         url = reverse('category-detail', args=[index+1])  # index is 0 based, but API pk is 1 based
         response = self.client.put(url, data=data, format='json')
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Category.objects.filter(user=self.user).count(), numToCreate)
-        self.assertEqual(Category.objects.filter(user=self.user)[index].name, nameToBe)
+        self.assertEqual(Category.objects.filter(user=self.user)[index].name, name_to_be)
+        self.assertEqual(Category.objects.filter(user=self.user)[index].display, display_to_be)
+        self.assertEqual(Category.objects.filter(user=self.user)[index].num_retired, num_retired_to_be)
 
     def test_delete_one(self):
         # arrange
         numToCreate = randint(20, 40)
         self._create_Category_instances(numToCreate)
-        index = randint(0, numToCreate)
+        index = randint(0, numToCreate-1)
 
         # act
         url = reverse('category-detail', args=[index+1])
