@@ -1,3 +1,9 @@
+'''
+Leitner system, a spaced repetition method.
+refer to http://en.wikipedia.org/wiki/Leitner_system
+Here we implements the Example Two
+'''
+
 DECK_TYPE = (
     ('C', 'Current'),
     ('0', 'Progress_0'),

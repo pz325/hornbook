@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-admin.autodiscover()
 # from django.views.generic import TemplateView
 
 from rest_framework import routers
@@ -24,14 +23,18 @@ from study.views import HanziStudyCountViewSet
 from study.views import HanziStudyRecordViewSet
 from study.views import UserViewSet
 from study.views import CategoryViewSet
+from study.views import CardViewSet
 
 import lexicon.views
+
+admin.autodiscover()
 
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'study/hanzi_study_count', HanziStudyCountViewSet, base_name='hanzistudycount')
 router.register(r'study/hanzi_study_record', HanziStudyRecordViewSet, base_name='hanzistudyrecord')
 router.register(r'study/category', CategoryViewSet, base_name='category')
+router.register(r'study/card', CardViewSet, base_name='card')
 router.register(r'study/user', UserViewSet, base_name='user')
 router.register(r'lexicon/hanzi', lexicon.views.HanziViewSet, base_name='hanzi')
 

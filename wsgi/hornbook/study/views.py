@@ -7,23 +7,31 @@ from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
 from django.contrib.auth.models import User
-from study.models import HanziStudyCount
-from study.models import HanziStudyRecord
-from study.models import Category
-from study.models import StudySessionContentLog
-from study.models import StudySessionResultLog
+from models.study import HanziStudyCount
+from models.study import HanziStudyRecord
+from models.category import Category
+from models.log import StudySessionContentLog
+from models.log import StudySessionResultLog
 from lexicon.models import Hanzi
+from models.card import Card
 
-from study.serializers import HanziStudyCountSerializer
-from study.serializers import HanziStudyRecordSerializer
-from study.serializers import UserSerializer
-from study.serializers import CategorySerializer
+from serializers import HanziStudyCountSerializer
+from serializers import HanziStudyRecordSerializer
+from serializers import UserSerializer
+from serializers import CategorySerializer
+from serializers import CardSerializer
 
-import leitner
+import models.leitner as leitner
+
 import random
 import jsonpickle
 import logging
 log = logging.getLogger('hornbook')
+
+
+class CardViewSet(viewsets.ModelViewSet):
+    queryset = Card.objects.all()
+    serializer_class = CardSerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -35,15 +43,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_class = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        card_id = self.request.data['card_id']
+        card_instance = get_object_or_404(Card, id=card_id)
+        serializer.save(user=self.request.user, card=card_instance)
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
-
-    @staticmethod
-    def get_instance(user, name):
-        instance = get_object_or_404(Category, user=user, name=name)
-        return instance
 
 
 class HanziStudyCountViewSet(viewsets.ModelViewSet):

@@ -1,18 +1,26 @@
-from study.models import HanziStudyCount
-from study.models import HanziStudyRecord
-from study.models import Category
+from models.card import Card
+from models.study import HanziStudyCount
+from models.study import HanziStudyRecord
+from models.category import Category
 from rest_framework import serializers
 from django.contrib.auth.models import User
 import django.utils.timezone
 
 
+class CardSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Card
+        files = ('id', 'font_size')
+
+
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    card = serializers.SlugRelatedField(slug_field='id', read_only=True)
     id = serializers.ReadOnlyField()
 
     class Meta:
         model = Category
-        fileds = ('user', 'id', 'name', 'display', 'num_retired')
+        fileds = ('user', 'id', 'display', 'num_retired', 'card')
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
