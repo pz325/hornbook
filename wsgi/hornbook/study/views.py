@@ -63,12 +63,12 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         '''
-        required 'category' is part of POST body
+        required 'category_id' is part of POST body
         '''
-        category = None
-        if 'category' in self.request.data:
-            category = self.request.data['category']
-        category_instance = get_object_or_404(Category, user=self.request.user, name=category)
+        category_id = None
+        if 'category_id' in self.request.data:
+            category_id = self.request.data['category_id']
+        category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
         serializer.save(user=self.request.user, category=category_instance)
 
     def get_queryset(self):
@@ -76,9 +76,9 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
         filter by user, and category if asked
         '''
         queryset = self.queryset.filter(user=self.request.user)
-        category = self.request.query_params.get('category', None)
-        if category is not None:
-            category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+        category_id = self.request.query_params.get('category_id', None)
+        if category_id is not None:
+            category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
             queryset = self.queryset.filter(category=category_instance)
 
         return queryset

@@ -44,4 +44,4 @@ class HanziStudyCount(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return '.'.join([self.user.username, self.category.name, str(self.count)])
+        return '.'.join([self.user.username, self.category.display, str(self.count)])

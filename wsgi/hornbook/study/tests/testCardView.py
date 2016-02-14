@@ -17,7 +17,6 @@ class CardViewTests(APITestCase):
     def test_create(self):
         # arrange
         url = reverse('card-list')
-        print(url)
         font_size = 'font_size'
         data = {
             'font_size': font_size
@@ -65,7 +64,7 @@ class CardViewTests(APITestCase):
         # arrange
         num_to_create = randint(20, 40)
         util.create_Card_instances(num_to_create)
-        index = randint(0, num_to_create)
+        index = randint(0, num_to_create-1)
 
         # act
         new_font_size = 'new_font_size'
