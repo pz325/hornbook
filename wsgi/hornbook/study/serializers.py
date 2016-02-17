@@ -34,7 +34,7 @@ class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):
 
 class HanziStudyRecordSerializer(serializers.HyperlinkedModelSerializer):
     hanzi = serializers.CharField()
-    category = serializers.CharField()
+    category = serializers.SlugRelatedField(slug_field='id', read_only=True)
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:

@@ -34,7 +34,7 @@ class HanziStudyRecord(CategorisedLeitnerStudyRecord):
     hanzi = models.ForeignKey(Hanzi, editable=False, db_index=True)
 
     def __unicode__(self):
-        return '.'.join([self.user.username, self.category.name, self.hanzi.content])
+        return '.'.join([self.user.username, self.category.display, self.hanzi.content])
 
 
 class HanziStudyCount(models.Model):

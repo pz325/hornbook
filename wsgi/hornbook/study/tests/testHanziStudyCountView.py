@@ -6,7 +6,7 @@ from study.models.study import HanziStudyCount
 import util
 
 
-class HanziStudyCountViewSetTests(APITestCase):
+class HanziStudyCountViewTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
         self.user = util.create_one_User_instance(self.username)
