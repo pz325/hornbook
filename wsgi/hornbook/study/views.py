@@ -197,14 +197,15 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         if 'category' in self.request.data:
             category = self.request.data['category']
         category_instance = CategoryViewSet.get_instance(user=self.request.user, name=category)
+        all_records = all_records.filter(category=category_instance)
 
         grasped_hanzi_key = 'grasped_hanzi'
         new_hanzi_key = 'new_hanzi'
         grasped_hanzi = request.data[grasped_hanzi_key] if grasped_hanzi_key in request.data else []
         new_hanzi = request.data[new_hanzi_key] if new_hanzi_key in request.data else []
         study_count = get_object_or_404(HanziStudyCount, user=request.user, category=category_instance)
-        log.debug(study_count)
-        log.debug(request.data)
+        # log.debug(study_count)
+        # log.debug(request.data)
 
         grasped_hanzi = jsonpickle.decode(grasped_hanzi)
         new_hanzi = jsonpickle.decode(new_hanzi)

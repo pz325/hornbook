@@ -345,6 +345,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.user = _create_one_User_instance(self.username)
         self.client.force_authenticate(user=self.user)
         self.category = _create_one_Category_instance(self.user, 'category')
+        self.category2 = _create_one_Category_instance(self.user, 'category2')
 
         another_user = _create_one_User_instance('another_user')
         another_category = _create_one_Category_instance(another_user, 'category_for_another_user')
@@ -569,6 +570,25 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'李')).repeat_count, 0)  # 北 is new
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'南')).repeat_count, 1)
 
+    def test_set_leitner_record_study_count_remains_when_adding_new(self):
+        # arrange
+        count = 12
+        _create_one_HanziStudyCount_instance(self.user, self.category, count)  # irrelate setting
+
+        # act
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        data = {
+            'category': self.category.name,
+            'grasped_hanzi': json.dumps([]),
+            'new_hanzi': json.dumps([u'东'])  # 东 stay deck C
+        }
+
+        response = self.client.post(url, data)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
+
     def test_set_leitner_record_existing_hanzi_stay_in_deck_C(self):
         # arrange
         _create_one_leitner_record(self.user, self.category.name, u'东', 'C')
@@ -588,7 +608,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count+1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'C')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
@@ -612,7 +632,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count+1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'C')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
@@ -636,7 +656,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count+1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'C')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
@@ -683,7 +703,7 @@ class HanziStudyRecordViewSetTests(APITestCase):
 
         # assert
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count+1)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'C')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'C')
@@ -711,3 +731,28 @@ class HanziStudyRecordViewSetTests(APITestCase):
         self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'R')
         self.assertEqual(HanziStudyRecord.objects.get(user=self.user, hanzi=Hanzi.objects.get(content=u'北')).leitner_deck, 'R')
+
+    def test_set_leitner_record_add_existing_hanzi_to_another_category(self):
+        # arrange
+        _create_one_leitner_record(self.user, self.category.name, u'东', '3')
+        _create_one_leitner_record(self.user, self.category.name, u'北', 'R')
+        count = 12
+        _create_one_HanziStudyCount_instance(self.user, self.category2, count)   # 2 is the last number in deck '3'
+
+        # act
+        url = reverse('hanzistudyrecord-list') + '/leitner_record'
+        data = {
+            'category': self.category2.name,
+            'grasped_hanzi': json.dumps([]),
+            'new_hanzi': json.dumps([u'东'])
+        }
+
+        response = self.client.post(url, data)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(HanziStudyCount.objects.get(user=self.user).count, count)
+        self.assertEqual(Hanzi.objects.all().count(), 3)  # including 王 added during Setup
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, category=self.category, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, '3')
+        self.assertEqual(HanziStudyRecord.objects.get(user=self.user, category=self.category2, hanzi=Hanzi.objects.get(content=u'东')).leitner_deck, 'C')
+
