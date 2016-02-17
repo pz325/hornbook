@@ -1,53 +1,34 @@
 # -*- coding: utf-8 -*-
 
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from study.models import HanziStudyCount
-from study.models import HanziStudyRecord
-from study.models import Category
-from study.models import Card
-from lexicon.models import Hanzi
-from django.contrib.auth.models import User
+import util
 
 
-
-import json
-from random import randint
-import unittest
-
-
-
-
-
-
-
-
-
-class UserViewSetTests(APITestCase):
+class UserViewTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        self.user = _create_one_User_instance(self.username)
+        self.user = util.create_one_User_instance(self.username)
         self.client.force_authenticate(user=self.user)
+        self.card = util.create_one_Card_instance()
+        self.category = util.create_one_Category_instance(self.user, self.card.id, 'category')
 
-        self.category = _create_one_Category_instance(self.user, 'category')
-
-        another_user = _create_one_User_instance('another_user')
-        another_category = _create_one_Category_instance(another_user, 'another_category')
-        _create_one_HanziStudyCount_instance(another_user, another_category, 10)
+        another_user = util.create_one_User_instance('another_user')
+        another_category = util.create_one_Category_instance(another_user, self.card.id, 'another_category')
+        util.create_one_HanziStudyCount_instance(another_user, another_category, 10)
 
         hanzi = u'王'
-        category = _create_one_Category_instance(another_user, 'category_for_another_user')
-        _create_one_HanziStudyRecord_instance(another_user, category, hanzi)
+        category = util.create_one_Category_instance(another_user, self.card.id, 'category_for_another_user')
+        util.create_one_HanziStudyRecord_instance(another_user, category, hanzi)
 
     def test_list_User(self):
         # arrange
         count = 3
-        _create_one_HanziStudyCount_instance(self.user, self.category, count)
+        util.create_one_HanziStudyCount_instance(self.user, self.category, count)
         hanzi = u'风'
-        _create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
+        util.create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
 
         # act
         url = reverse('user-list')
@@ -64,9 +45,9 @@ class UserViewSetTests(APITestCase):
     def test_get_one_User(self):
         # arrange
         count = 3
-        _create_one_HanziStudyCount_instance(self.user, self.category, count)
+        util.create_one_HanziStudyCount_instance(self.user, self.category, count)
         hanzi = u'风'
-        _create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
+        util.create_one_HanziStudyRecord_instance(self.user, self.category, hanzi)
 
         # act
         url = reverse('user-detail', args=[1])
@@ -76,6 +57,3 @@ class UserViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['study_records']), 1)
         self.assertEqual(response.data['study_records'][0], 'http://testserver' + reverse('hanzistudyrecord-detail', args=[2]))
-
-
-

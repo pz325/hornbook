@@ -68,7 +68,7 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
         category_id = None
         if 'category_id' in self.request.data:
             category_id = self.request.data['category_id']
-        category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
+        category_instance = get_object_or_404(Category, id=category_id)
         serializer.save(user=self.request.user, category=category_instance)
 
     def get_queryset(self):
@@ -78,7 +78,7 @@ class HanziStudyCountViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(user=self.request.user)
         category_id = self.request.query_params.get('category_id', None)
         if category_id is not None:
-            category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
+            category_instance = get_object_or_404(Category, id=category_id)
             queryset = self.queryset.filter(category=category_instance)
 
         return queryset
@@ -99,7 +99,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(user=self.request.user)
         category_id = self.request.query_params.get('category_id', None)
         if category_id is not None:
-            category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
+            category_instance = get_object_or_404(Category, id=category_id)
             queryset = self.queryset.filter(category=category_instance)
         return queryset
 
@@ -112,7 +112,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         category_id = None
         if 'category_id' in self.request.data:
             category_id = self.request.data['category_id']
-        category_instance = get_object_or_404(Category, user=self.request.user, id=category_id)
+        category_instance = get_object_or_404(Category, id=category_id)
 
         hanzi = self.request.data['hanzi']
         hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
@@ -155,7 +155,7 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         all_records = self.get_queryset()
 
         category_id = request.query_params.get('category_id', None)
-        category_instance = get_object_or_404(Category, user=request.user, id=category_id)
+        category_instance = get_object_or_404(Category, id=category_id)
 
         NUM_RETIRED = 15
         num_retired = request.query_params.get('num_retired', NUM_RETIRED)
@@ -201,7 +201,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
         category_id = None
         if 'category_id' in self.request.data:
             category_id = self.request.data['category_id']
-        category_instance = get_object_or_404(Category, user=self.request.user, name=category_id)
+        category_instance = get_object_or_404(Category, id=category_id)
+        all_records = all_records.filter(category=category_instance)
 
         grasped_hanzi_key = 'grasped_hanzi'
         new_hanzi_key = 'new_hanzi'
@@ -239,9 +240,10 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             else:
                 HanziStudyRecord.objects.create(user=request.user, category=category_instance, hanzi=hanzi_instance)
 
-        # update session count
-        study_count.count += 1
-        study_count.save()
+        if len(grasped_hanzi) > 0:
+            # update session count
+            study_count.count += 1
+            study_count.save()
         # log.debug(study_count)
         StudySessionResultLog.objects.create(
             session_count=study_count.count,

@@ -50,7 +50,7 @@ class CardViewTests(APITestCase):
         # arrange
         num_to_create = randint(20, 40)
         font_sizes = util.create_Card_instances(num_to_create)
-        index = randint(0, num_to_create)
+        index = randint(0, num_to_create-1)
 
         # act
         url = reverse('card-detail', args=[index+1])  # index is 0 based, but API pk is 1 based

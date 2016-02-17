@@ -57,9 +57,8 @@ def create_one_HanziStudyRecord_instance(user, category, hanzi):
 
 def create_one_leitner_record(user, category, hanzi, deck_id):
     hanzi_instance, _ = Hanzi.objects.get_or_create(content=hanzi)
-    category_instance, _ = Category.objects.get_or_create(user=user, name=category)
     return HanziStudyRecord.objects.create(
         user=user,
         hanzi=hanzi_instance,
-        category=category_instance,
+        category=category,
         leitner_deck=deck_id)
