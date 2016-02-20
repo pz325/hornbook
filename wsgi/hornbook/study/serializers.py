@@ -15,12 +15,13 @@ class CardSerializer(serializers.HyperlinkedModelSerializer):
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    card = serializers.SlugRelatedField(slug_field='id', read_only=True)
+    card = CardSerializer()
     id = serializers.ReadOnlyField()
 
     class Meta:
         model = Category
         fileds = ('user', 'id', 'display', 'num_retired', 'card')
+        read_only_fields = ('card')
 
 
 class HanziStudyCountSerializer(serializers.HyperlinkedModelSerializer):

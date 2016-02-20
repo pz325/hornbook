@@ -34,7 +34,7 @@ class CardViewSet(viewsets.ModelViewSet):
     serializer_class = CardSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     '''
     login required, so by default, filtering against the current user
     '''
@@ -42,10 +42,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_class = (permissions.IsAuthenticated,)
 
-    def perform_create(self, serializer):
-        card_id = self.request.data['card_id']
-        card_instance = get_object_or_404(Card, id=card_id)
-        serializer.save(user=self.request.user, card=card_instance)
+    # def perform_create(self, serializer):
+    #     print('==== perform_create ====')
+    #     print(self.request.data)
+    #     card_id = self.request.data['card_id']
+    #     card_instance = get_object_or_404(Card, id=card_id)
+    #     serializer.save(user=self.request.user, card=card_instance)
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
