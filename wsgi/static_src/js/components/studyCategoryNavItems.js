@@ -17,10 +17,10 @@ var StudyCategoryNavItems = React.createClass({
     render: function() {
         var component = this;
         var categoryNavItems = this.props.categories.map(function(category) {
-            var ref = 'StudyCategoryNavItems_navItem' + category;
+            var ref = 'StudyCategoryNavItems_navItem' + category.id;
             return (
-                <li ref = {ref} key={category.category}>
-                    <a href='#' onClick={component.navItemClickHandler.bind(null, category.category)}>
+                <li ref = {ref} key={category.id}>
+                    <a href='#' onClick={component.navItemClickHandler.bind(null, category)}>
                     {category.display}
                     </a>
                 </li>

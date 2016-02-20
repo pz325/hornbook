@@ -212,7 +212,8 @@ describe('NewContentForm', () => {
         var studyPanel = TestUtils.renderIntoDocument(
             <StudyPanel hanzis={hanzis} stats={stats}
                 recapMode={false}
-                sessionDoneHandler={sessionDoneHandler} />
+                sessionDoneHandler={sessionDoneHandler}
+                newContentAddedHandler={newContentAddedHandler} />
         );
 
         studyPanel.state.hanziIndex = hanzis.length - 1;

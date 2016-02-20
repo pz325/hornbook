@@ -4,14 +4,23 @@
 var StudyAPI = (function() {
     var API_LEITNER_RECORD_URL = "/api/study/hanzi_study_record/leitner_record";
     var API_PROGRESS_URL = "/api/study/hanzi_study_record/progress";
+    var API_CATEGORY_URL = "/api/study/category"
     
+    var getCategories = function() {
+        console.log('StudyAPI::getCategories()');
+        return $.ajax({
+            type: 'GET',
+            url: API_CATEGORY_URL
+        });
+    };
+
     var getLeitnerRecord = function(category) {
         console.log('StudyAPI::getLeitnerRecord() category: ', category);
         return $.ajax({
             type: 'GET',
             url: API_LEITNER_RECORD_URL,
             data: {
-                category: category
+                category_id: category['id']
             }
         });
     };
@@ -22,7 +31,7 @@ var StudyAPI = (function() {
             type: 'GET',
             url: API_PROGRESS_URL,
             data: {
-                category: category
+                category_id: category['id']
             }
         })
     }
@@ -41,7 +50,7 @@ var StudyAPI = (function() {
             type: "POST",
             url: API_LEITNER_RECORD_URL,
             data: {
-                category: category,
+                category_id: category['id'],
                 grasped_hanzi: JSON.stringify(knowns), 
                 new_hanzi: JSON.stringify(unknowns)
             },
@@ -61,7 +70,8 @@ var StudyAPI = (function() {
     return {
         updateLeitnerRecord: updateLeitnerRecord,
         getLeitnerRecord: getLeitnerRecord,
-        getProgress: getProgress
+        getProgress: getProgress,
+        getCategories: getCategories
     };
 })();
 

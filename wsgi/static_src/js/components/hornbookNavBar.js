@@ -40,11 +40,18 @@ var HornbookNavbar = React.createClass({
                         <Navbar.Toggle />
                     </Navbar.Header>
                     <Navbar.Collapse>
-                        <StudyCategoryNavItems ref='HornbookNavBar_studyCategoryNavItems' categories={this.props.categories} navItemClickHandler={this.props.navItemClickHandler} />
+                        <StudyCategoryNavItems 
+                            ref='HornbookNavBar_studyCategoryNavItems' 
+                            categories={this.props.categories} 
+                            navItemClickHandler={this.props.navItemClickHandler} />
                         <Nav>
                             <NavItem href="#"><Glyphicon glyph="plus"/></NavItem>
                         </Nav>
-                        <UserNavDropdown ref='HornbookNavbar_userNavDropdown' username={this.props.username} logInHandler={this.login} logOutHandler={this.logout} />
+                        <UserNavDropdown 
+                            ref='HornbookNavbar_userNavDropdown' 
+                            username={this.props.username} l
+                            ogInHandler={this.login} 
+                            logOutHandler={this.logout} />
                     </Navbar.Collapse>
                     
                 </Navbar>

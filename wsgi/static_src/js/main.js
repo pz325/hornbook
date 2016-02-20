@@ -16,24 +16,24 @@ $.ajaxSetup({
     }
 });
 
+
 var username = $("#app").attr("data-username");
-var categories = [{'category': 'read_hanzi', 'display': '认字'},
-        {'category': 'write_hanzi', 'display': '写字'},
-        {'category': 'chinese_poem', 'display': '古诗'}
-    ];
+var categories = [];
+
 
 var App = React.createClass({
     getInitialState: function() {
         return {
             'hanzis': [],
             'stats': {},
-            'category': 'read_hanzi',
+            'category': {},
             'recapMode': false,
             'fontClass': 'han_character'
         };
     },
 
     studyCategory: function(category) {
+        console.log('App::studyCategory() category: ', category);
         this._initStudyPanel(category);
     },
 
@@ -61,7 +61,8 @@ var App = React.createClass({
     },
 
     componentDidMount: function() {
-        this._initStudyPanel(this.state.category);
+        console.log('App::componentDidMount()');
+        this._initStudyPanel(categories[0]);
     },
 
     _commitResult: function(knowns, unknowns) {
@@ -72,7 +73,6 @@ var App = React.createClass({
     _initStudyPanel: function(category) {
         console.log('App::_initStudyPanel() category: ', category);
         var component = this;
-        var fontClass = category === "chinese_poem" ? "han_character_small" : "han_character";
 
         $.when(StudyAPI.getLeitnerRecord(category), StudyAPI.getProgress(category))
         .done(function(leitnerRecordResp, progressResp){
@@ -84,7 +84,7 @@ var App = React.createClass({
                 'hanzis': Util.shuffle(hanzis),
                 'stats': progressResp[0],
                 'recapMode': false,
-                'fontClass': fontClass,
+                'fontClass': category.card.font_size,
                 'category': category
             });      
         });
@@ -114,9 +114,13 @@ var App = React.createClass({
 
     render: function() {
         console.log('App::render() username:', username);
+        console.log('App::render() categories:', categories);
         return (
             <div>
-                <HornbookNavBar categories={categories} username={username} navItemClickHandler={this.studyCategory} />
+                <HornbookNavBar 
+                    categories={categories} 
+                    username={username} 
+                    navItemClickHandler={this.studyCategory} />
                 <StudyPanel hanzis={this.state.hanzis} 
                     stats={this.state.stats} 
                     sessionDoneHandler={this.studyPanelSessionDoneHandler}
@@ -128,4 +132,9 @@ var App = React.createClass({
     }
 });
 
-ReactDOM.render(<App />, document.getElementById('app'));
+$.when(StudyAPI.getCategories())
+    .done(function(resp){
+        categories = resp.results;
+        ReactDOM.render(<App />, document.getElementById('app'));
+    });
+

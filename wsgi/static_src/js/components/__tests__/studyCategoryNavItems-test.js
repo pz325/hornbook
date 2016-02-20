@@ -7,10 +7,40 @@ var expect = require('expect');
 const StudyCategoryNavItems = require('../studyCategoryNavItems');
 
 describe('StudyCategoryNavItems', () => {
-    const categories = [{'category': 'a', 'display': 'a-display'},
-        {'category': 'b', 'display': 'b-display'},
-        {'category': 'c', 'display': 'c-display'}
-    ];
+    const categories = [
+        {
+            "url": "http://localhost:8000/api/study/category/4",
+            "user": "xinrong",
+            "card": {
+                "url": "http://localhost:8000/api/study/card/2",
+                "font_size": "han_character_small"
+            },
+            "id": 4,
+            "display": "认字",
+            "num_retired": 5
+        },
+        {
+            "url": "http://localhost:8000/api/study/category/5",
+            "user": "xinrong",
+            "card": {
+                "url": "http://localhost:8000/api/study/card/1",
+                "font_size": "han_character"
+            },
+            "id": 5,
+            "display": "write_hanzi",
+            "num_retired": 10
+        },
+        {
+            "url": "http://localhost:8000/api/study/category/6",
+            "user": "xinrong",
+            "card": {
+                "url": "http://localhost:8000/api/study/card/1",
+                "font_size": "han_character"
+            },
+            "id": 6,
+            "display": "read_hanzi",
+            "num_retired": 10
+        }]
 
     var selectedCategory = null;
     var navItemClickHandler = function(category) {
@@ -37,6 +67,6 @@ describe('StudyCategoryNavItems', () => {
         var index = Math.floor(Math.random() * categories.length);
 
         TestUtils.Simulate.click(ReactDOM.findDOMNode(navItems[index]).firstChild);
-        expect(selectedCategory).toBe(categories[index].category);
+        expect(selectedCategory.id).toBe(categories[index].id);
     });
 });

@@ -1,2 +1,2 @@
-var context = require.context('./static/js/components', true, /-test\.jsx?$/);
+var context = require.context('./static_src/js/components', true, /-test\.jsx?$/);
 context.keys().forEach(context);
