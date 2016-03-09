@@ -20,7 +20,8 @@ var StudyAPI = (function() {
             type: 'GET',
             url: API_LEITNER_RECORD_URL,
             data: {
-                category_id: category['id']
+                category_id: category['id'],
+                num_retired: category['num_retired']
             }
         });
     };
