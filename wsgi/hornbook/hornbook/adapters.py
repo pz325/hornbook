@@ -9,9 +9,9 @@ log = logging.getLogger('hornbook')
 
 def setupNewUser(user):
     # add category
-    read_hanzi = Category.objects.create(user=user, name='read_hanzi')
-    write_hanzi = Category.objects.create(user=user, name='write_hanzi')
-    chinese_poem = Category.objects.create(user=user, name='chinese_poem')
+    read_hanzi = Category.objects.create(user=user, card_id=1, display='read')
+    write_hanzi = Category.objects.create(user=user, card_id=1, display='write')
+    chinese_poem = Category.objects.create(user=user, card_id=2, display='poem')
     # add count
     HanziStudyCount.objects.create(user=user, category=read_hanzi, count=1)
     HanziStudyCount.objects.create(user=user, category=write_hanzi, count=1)
