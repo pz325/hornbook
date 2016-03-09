@@ -85,7 +85,7 @@ var StudyPanel = React.createClass({
         var hanzi = this.props.hanzis ? this.props.hanzis[this.state.hanziIndex] : '';
 
         return (
-            <div key={this.props.hanzis}>
+            <div>
                 <NewContentForm ref='StudyPanel_newContentForm' statLabels={statLabels} addNewContents={this.addNewContents} />
                 <ReactBootstrap.ProgressBar ref='StudyPanel_progressBar' max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
                 <ClickableSpan ref='StudyPanel_clickableSpan' content={hanzi} clickHandler={this.addToKnowns} fontClass={fontClass} />

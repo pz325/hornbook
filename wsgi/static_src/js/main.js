@@ -121,7 +121,7 @@ var App = React.createClass({
                     categories={categories} 
                     username={username} 
                     navItemClickHandler={this.studyCategory} />
-                <StudyPanel hanzis={this.state.hanzis} 
+                <StudyPanel key={this.state.hanzis} hanzis={this.state.hanzis} 
                     stats={this.state.stats} 
                     sessionDoneHandler={this.studyPanelSessionDoneHandler}
                     newContentAddedHandler={this.studyPanelNewContentAddedHandler}
