@@ -77,7 +77,7 @@ var StudyPanel = React.createClass({
     },
 
     render: function() {
-        var statLabels = <StatLabels stats={this.props.stats} />;
+        // var statLabels = <StatLabels stats={this.props.stats} />;
         
         var progressMax = this.props.hanzis.length;
         var progressNow = progressMax > 0 ? this.state.hanziIndex + 1 : 0;
@@ -86,7 +86,8 @@ var StudyPanel = React.createClass({
 
         return (
             <div>
-                <NewContentForm ref='StudyPanel_newContentForm' statLabels={statLabels} addNewContents={this.addNewContents} />
+                <NewContentForm ref='StudyPanel_newContentForm' addNewContents={this.addNewContents} />
+                <StatLabels stats={this.props.stats} />
                 <ReactBootstrap.ProgressBar ref='StudyPanel_progressBar' max={progressMax} now={progressNow} bsStyle="success" label="%(now)s of %(max)s" />
                 <ClickableSpan ref='StudyPanel_clickableSpan' content={hanzi} clickHandler={this.addToKnowns} fontClass={fontClass} />
                 {this.getAddToRecapButton()}

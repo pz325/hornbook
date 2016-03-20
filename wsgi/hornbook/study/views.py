@@ -134,6 +134,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
 
     def _get_progress(self, request):
         all_records = self.get_queryset()
+        category_id = request.query_params.get('category_id', None)
+        category_instance = get_object_or_404(Category, id=category_id)
+        study_count = get_object_or_404(HanziStudyCount, user=request.user, category=category_instance)
 
         count_new = all_records.filter(leitner_deck='C').count()
         count_grasped = all_records.filter(leitner_deck='R').count()
@@ -143,6 +146,8 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             'new': count_new,
             'studying': count_studying,
             'grasped': count_grasped,
+            'count': study_count.count,
+            'timestamp': study_count.timestamp
             }
 
         return Response(ret)
