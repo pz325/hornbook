@@ -13,13 +13,13 @@ var StatLabels = React.createClass({
         }).isRequired
     },
     render: function() {
+        var lastStudyTimestamp = new Date(this.props.stats.timestamp);
         return (
             <div>
                 <ReactBootstrap.Label bsStyle='warning'>New: {this.props.stats.new}</ReactBootstrap.Label>
                 <ReactBootstrap.Label bsStyle='info'>Studying: {this.props.stats.studying}</ReactBootstrap.Label>
                 <ReactBootstrap.Label bsStyle='success'>Grasped: {this.props.stats.grasped}</ReactBootstrap.Label>
-                <ReactBootstrap.Label bsStyle='info'>Total Study: {this.props.stats.count}</ReactBootstrap.Label>
-                <ReactBootstrap.Label bsStyle='info'>Last Study: {this.props.stats.timestamp}</ReactBootstrap.Label>
+                <ReactBootstrap.Label bsStyle='info'>Last Study: {lastStudyTimestamp.toDateString()}</ReactBootstrap.Label>
             </div>
         );
     }
