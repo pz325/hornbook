@@ -176,9 +176,9 @@ class HanziStudyRecordViewSet(viewsets.ModelViewSet):
             progress_deck_contents = progress_deck_contents + [h for h in all_records.filter(leitner_deck=i)]  # progres deck
 
         retired_deck = all_records.filter(leitner_deck='R')
-        index = range(0, len(retired_deck))
-        random.shuffle(index)
-        picked_retired = [retired_deck[i] for i in index[:num_retired]]
+        # picked oldest retired record
+        retired_deck = sorted(retired_deck, key=lambda record: record.revise_date)
+        picked_retired = retired_deck[:num_retired]
         retired_deck_contents = [h for h in picked_retired]
 
         ret = current_deck_contents + progress_deck_contents + retired_deck_contents
