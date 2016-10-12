@@ -49,8 +49,8 @@ var HornbookNavbar = React.createClass({
                         </Nav>
                         <UserNavDropdown 
                             ref='HornbookNavbar_userNavDropdown' 
-                            username={this.props.username} l
-                            ogInHandler={this.login} 
+                            username={this.props.username} 
+                            logInHandler={this.login} 
                             logOutHandler={this.logout} />
                     </Navbar.Collapse>
                     
